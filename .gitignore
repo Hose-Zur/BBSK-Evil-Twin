@@ -1,0 +1,41 @@
+# ─── Python ─────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.so
+*.egg
+
+# ─── PCAP i wyniki (duże pliki binarne) ────────────────────────
+przechwycony_ruch/*.pcap
+przechwycony_ruch/*.pcapng
+przechwycony_ruch/*.cap
+wyniki/*.png
+wyniki/*.csv
+wyniki/*.html
+
+# ─── IDE i edytory ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+*.iml
+
+# ─── System ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tmp
+
+# ─── Dokumentacja (wersje robocze) ──────────────────────────
+dokumentacja/*.tmp
+dokumentacja/~*.docx
+
+# ─── Zachowaj strukturę katalogów ──────────────────────────────
+!przechwycony_ruch/.gitkeep
+!wyniki/.gitkeep
