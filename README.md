@@ -242,12 +242,12 @@ Szczegółowe informacje: [`docs/security-considerations.md`](docs/security-cons
 
 ## Autorzy
 
-[Imię Nazwisko], nr albumu: XXXXXX
-[Imię Nazwisko], nr albumu: XXXXXX
+Piotr Straszak,
+Hubert Czernicki
 
 **Akademia Górniczo-Hutnicza im. Stanisława Staszica w Krakowie**
 Wydział Informatyki, Elektroniki i Telekomunikacji
-Kierunek: [nazwa kierunku]
+Kierunek: Cyberbezpieczeństwo
 Rok akademicki 2025/2026
 
 ---
