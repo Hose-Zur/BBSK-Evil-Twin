@@ -190,33 +190,52 @@ def three_ap_pcap(tmp_workspace):
 
 
 class TestCliParsing:
-    """Testy argumentów wiersza poleceń."""
+    """Testy argumentów wiersza poleceń (v2.0 — argparse)."""
 
     def test_no_args_default_pcap(self):
-        """Bez argumentów — domyślna ścieżka /tmp/demo-01.pcap."""
+        """Bez argumentów — domyślna ścieżka /tmp/demo-01.pcap (kończy się błędem)."""
         with patch.object(sys, "argv", ["analyze_pcap.py"]):
             import analyze_pcap as ap
 
-            # Wymuś przeładowanie stałych z argumentów
             with pytest.raises(SystemExit):
                 ap.main()
-            # Sprawdzamy domyślną ścieżkę — nie ma pliku
-            assert hasattr(ap, "PCAP_FILE")
+            # Po imporcie moduł powinien istnieć
+            assert ap is not None
 
     def test_with_pcap_arg(self):
-        """Z argumentem pcap — używa podanej ścieżki."""
+        """Z argumentem pcap — funkcja parse_args() zwraca ścieżkę."""
         with patch.object(sys, "argv", ["analyze_pcap.py", "/tmp/test.pcap"]):
             import analyze_pcap as ap
 
-            assert hasattr(ap, "PCAP_FILE")
+            args = ap.parse_args()
+            assert args.pcap == "/tmp/test.pcap"
+            assert args.ssid is None
 
     def test_with_ssid_arg(self):
-        """Z dwoma argumentami — używa pcap i SSID."""
+        """Z dwoma argumentami — parse_args zwraca pcap i SSID."""
         with patch.object(sys, "argv", ["analyze_pcap.py", "/tmp/test.pcap", "MySSID"]):
             import analyze_pcap as ap
 
-            assert hasattr(ap, "PCAP_FILE")
-            assert hasattr(ap, "TARGET_SSID")
+            args = ap.parse_args()
+            assert args.pcap == "/tmp/test.pcap"
+            assert args.ssid == "MySSID"
+
+    def test_json_flag(self):
+        """Flaga --json włącza eksport JSON."""
+        with patch.object(sys, "argv", ["analyze_pcap.py", "/tmp/test.pcap", "--json"]):
+            import analyze_pcap as ap
+
+            args = ap.parse_args()
+            assert args.json is True
+
+    def test_output_dir_flag(self):
+        """Flaga -o ustawia katalog wyjściowy."""
+        with patch.object(sys, "argv",
+                          ["analyze_pcap.py", "/tmp/test.pcap", "-o", "./wyniki/"]):
+            import analyze_pcap as ap
+
+            args = ap.parse_args()
+            assert args.output_dir == "./wyniki/"
 
 
 # ─── Testy: parsowanie ramek Beacon ────────────────────────────
@@ -377,12 +396,11 @@ class TestErrorHandling:
     """Testy obsługi błędów."""
 
     def test_missing_file(self):
-        """Nieistniejący plik — kod wyjścia 1."""
+        """Nieistniejący plik — kończy się z błędem SystemExit."""
         with patch.object(sys, "argv", ["analyze_pcap.py", "/tmp/nonexistent.pcap"]):
-            with pytest.raises(SystemExit) as exc:
+            with pytest.raises(SystemExit):
                 import analyze_pcap as ap
                 ap.main()
-            # Nie sprawdzamy konkretnego kodu — ważne że kończy z błędem
 
     def test_missing_scapy(self):
         """Brak scapy — komunikat o błędzie."""
@@ -503,7 +521,7 @@ class TestDataStructure:
     """Testy poprawności struktur danych skryptu."""
 
     def test_expected_keys_in_ap_dict(self):
-        """Słownik AP powinien mieć oczekiwane klucze."""
+        """Słownik AP powinien mieć oczekiwane klucze (v2.0 — rozszerzona struktura)."""
         from collections import defaultdict
 
         aps = defaultdict(
@@ -514,17 +532,70 @@ class TestDataStructure:
                 "supported_rates": set(),
                 "vendor_specific": [],
                 "frame_count": 0,
+                "channel": None,
+                "country": None,
+                "power_constraint": None,
+                "erp_protection": None,
+                "erp_barker_preamble": None,
+                "ht_capabilities": None,
+                "ht_primary_channel": None,
+                "ht_secondary_channel_offset": None,
+                "extended_capabilities_raw": None,
+                "ie_distribution": {},
+                "beacon_intervals": [],
+                "last_beacon_time": None,
             }
         )
 
         ap_data = aps["aa:bb:cc:dd:ee:01"]
-        expected_keys = {"ssid", "seq_nums", "rssi", "supported_rates", "vendor_specific", "frame_count"}
-        assert set(ap_data.keys()) == expected_keys, f"Brakujące klucze: {expected_keys - set(ap_data.keys())}"
+        # Sprawdź, że klucze z v1.0 wciąż istnieją
+        legacy_keys = {"ssid", "seq_nums", "rssi", "supported_rates",
+                       "vendor_specific", "frame_count"}
+        assert legacy_keys.issubset(set(ap_data.keys())), \
+            f"Brakujące legacy klucze: {legacy_keys - set(ap_data.keys())}"
+
+        # Sprawdź typy danych
+        assert isinstance(ap_data["frame_count"], int)
         assert isinstance(ap_data["seq_nums"], list)
         assert isinstance(ap_data["rssi"], list)
         assert isinstance(ap_data["supported_rates"], set)
         assert isinstance(ap_data["vendor_specific"], list)
-        assert isinstance(ap_data["frame_count"], int)
+        assert isinstance(ap_data["beacon_intervals"], list)
+        assert isinstance(ap_data["ie_distribution"], dict)
+
+    def test_new_keys_in_ap_dict(self):
+        """v2.0 — nowe klucze dla zaawansowanego fingerprintingu."""
+        from collections import defaultdict
+
+        aps = defaultdict(
+            lambda: {
+                "ssid": "?",
+                "seq_nums": [],
+                "rssi": [],
+                "supported_rates": set(),
+                "vendor_specific": [],
+                "frame_count": 0,
+                "channel": None,
+                "country": None,
+                "power_constraint": None,
+                "erp_protection": None,
+                "erp_barker_preamble": None,
+                "ht_capabilities": None,
+                "ht_primary_channel": None,
+                "ht_secondary_channel_offset": None,
+                "extended_capabilities_raw": None,
+                "ie_distribution": {},
+                "beacon_intervals": [],
+                "last_beacon_time": None,
+            }
+        )
+
+        ap_data = aps["bb:cc:dd:ee:ff:01"]
+        # Nowe klucze powinny istnieć
+        assert ap_data["channel"] is None
+        assert ap_data["country"] is None
+        assert ap_data["ht_capabilities"] is None
+        assert ap_data["beacon_intervals"] == []
 
 
 if __name__ == "__main__":

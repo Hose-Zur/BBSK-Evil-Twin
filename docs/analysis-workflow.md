@@ -1,15 +1,30 @@
-# Workflow analizy pcap
+# Workflow analizy pcap (v2.0)
 
-Ten dokument opisuje szczegółową procedurę analizy pliku `.pcap` w celu wykrycia ataku Evil Twin, z wykorzystaniem Wireshark i `analyze_pcap.py`.
+Ten dokument opisuje szczegółową procedurę analizy pliku `.pcap` w celu wykrycia ataku Evil Twin, z wykorzystaniem Wireshark i narzędzi projektu `BBSK-Evil-Twin`.
+
+**Dostępne narzędzia:**
+
+| Narzędzie | Opis | Output |
+|---|---|---|
+| `analyze_pcap.py` (v2.0) | Automatyczna analiza wszystkich AP | Raport tekstowy + JSON + CSV + wykres PNG |
+| `beacon_diff.py` (v1.0) | Szczegółowe porównanie IE między dwoma AP | Raport tekstowy + JSON + Markdown |
+| `generate_report.py` (v1.0) | Generator raportu końcowego | Raport Markdown → DOCX/PDF |
 
 ---
 
-## 1. Analiza automatyczna (analyze_pcap.py)
+## 1. Analiza automatyczna (analyze_pcap.py v2.0)
 
 ### Uruchomienie
 
 ```bash
+# Tryb podstawowy (legacy compatible)
 python3 skrypty/analyze_pcap.py <ścieżka/do/pliku.pcap> [SSID]
+
+# Tryb rozszerzony — JSON + CSV + wykres
+python3 skrypty/analyze_pcap.py plik.pcap SSID --json --csv -o ./wyniki/
+
+# Tryb cichy — bez wykresu
+python3 skrypty/analyze_pcap.py plik.pcap SSID --no-plot --quiet
 ```
 
 ### Co robi skrypt
@@ -18,10 +33,23 @@ python3 skrypty/analyze_pcap.py <ścieżka/do/pliku.pcap> [SSID]
 |---|---|
 | 1. Wczytanie | `rdpcap()` — załadowanie pliku .pcap |
 | 2. Filtrowanie | Tylko ramki Beacon (Dot11 subtype 8) |
-| 3. Ekstrakcja | SSID, Supported Rates, Vendor Specific IE |
-| 4. Odczyt | Sequence Number (SC >> 4), RSSI z RadioTap |
-| 5. Raport | Tabela AP z metrykami |
-| 6. Wykres | Seq num + RSSI w czasie, zapis do .png |
+| 3. Ekstrakcja IE | SSID, Supported Rates, Vendor Specific, HT Capabilities, Country, ERP, Power Constraint, Extended Capabilities |
+| 4. Odczyt | Sequence Number (SC >> 4), RSSI z RadioTap, kanał (DSSS), interwał beaconów |
+| 5. Raport | Szczegółowa tabela AP z metrykami + podsumowanie statystyczne |
+| 6. Eksport | JSON (dla innych narzędzi), CSV (dla arkuszy) |
+| 7. Wykres | Seq num + RSSI w czasie, zapis do .png (opcjonalnie) |
+
+### Nowości w v2.0
+
+- `--json` — eksport do JSON z metadanymi (znacznik czasu UTC, liczba AP)
+- `--csv` — eksport do CSV (kompatybilny z Excel/Google Sheets)
+- `-o / --output-dir` — jawny katalog wyjściowy
+- `--no-plot` — wyłączenie wykresów (gdy brak GUI)
+- `--quiet` — tryb cichy (tylko komunikaty o błędach)
+- Rozszerzona baza OUI (50+ producentów)
+- Parsowanie: HT Capabilities, HT Operation, Country, ERP, Power Constraint, Extended Capabilities
+- Śledzenie interwałów między beaconami
+- Podsumowanie statystyczne (zakres RSSI, liczba unikalnych SSID)
 
 ### Interpretacja wyników
 
@@ -118,14 +146,99 @@ wlan.fc.type_subtype == 8 && wlan.ssid == "AGH_Test"
 
 ---
 
-## 4. Generowanie dowodów
+## 4. Szczegółowe porównanie IE (beacon_diff.py v1.0)
+
+### Uruchomienie
+
+```bash
+# Automatyczne — porównaj dwa pierwsze AP z tym samym SSID
+python3 skrypty/beacon_diff.py plik.pcap AGH_Test
+
+# Ręczne — porównaj konkretne BSSIDy
+python3 skrypty/beacon_diff.py plik.pcap --bssid1 AA:BB:CC:DD:EE:01 --bssid2 AA:BB:CC:DD:EE:02
+
+# Z eksportem
+python3 skrypty/beacon_diff.py plik.pcap AGH_Test --json --markdown -o ./wyniki/
+```
+
+### Co robi skrypt
+
+| Krok | Opis |
+|---|---|
+| 1. Ekstrakcja | Wszystkie IE z ramek Beacon dla dwóch BSSID |
+| 2. Parsowanie | SSID, Supported Rates, Vendor Specific (z OUI), HT Capabilities, ERP, Country, RSN |
+| 3. Porównanie | Identyfikacja IE które się różnią między AP |
+| 4. Metryki | Różnica RSSI, nakładanie Sequence Numbers, liczba ramek |
+| 5. Werdykt | Automatyczna klasyfikacja: EVIL_TWIN_CONFIRMED / SUSPICIOUS / NO_EVIDENCE |
+| 6. Eksport | JSON + Markdown (do raportu końcowego) |
+
+### Interpretacja wyników
+
+| Status | Znaczenie |
+|---|---|
+| `DIFFERENT` | Ten IE różni się między AP — potencjalny dowód Evil Twin |
+| `IDENTICAL` | IE identyczny w obu AP — brak przesłanek |
+| `Różnica RSSI > 10 dBm` | Anomalia sygnału — typowe dla Evil Twin |
+| `Seq overlap = 0` | Dwa całkowicie niezależne strumienie seq |
+
+---
+
+## 5. Generowanie raportu końcowego (generate_report.py v1.0)
+
+### Uruchomienie
+
+```bash
+python3 skrypty/generate_report.py \
+    --analyze-json wyniki/evil_twin_analysis.json \
+    --diff-json wyniki/beacon_diff.json \
+    --autorzy "Piotr Straszak, Jan Kowalski" \
+    --przedmiot "Bezpieczeństwo Sieci Bezprzewodowych" \
+    --ssid "AGH_Test" \
+    -o raport_koncowy.md
+```
+
+### Konwersja do DOCX
+
+```bash
+# Wymaga pandoc: sudo apt install pandoc
+pandoc raport_koncowy.md -o raport_koncowy.docx --from markdown --to docx
+```
+
+---
+
+## 6. Generowanie dowodów
 
 Dla każdej metody wygeneruj materiał dowodowy do raportu końcowego:
 
 | Metoda | Materiał dowodowy | Narzędzie |
 |---|---|---|
-| IE fingerprinting | Screenshot Tagged parameters × 2 AP | Wireshark |
-| RSSI | Screenshot Radiotap header × kilka ramek | Wireshark |
-| Seq numbers | Wykres seq w czasie | `analyze_pcap.py` |
+| IE fingerprinting | Screenshot Tagged parameters × 2 AP + raport JSON/MD | Wireshark + `beacon_diff.py` |
+| RSSI | Screenshot Radiotap header × kilka ramek + JSON | Wireshark + `analyze_pcap.py` |
+| Seq numbers | Wykres seq w czasie + JSON z zakresami | `analyze_pcap.py` |
 | Captive portal | Screenshot strony logowania | Telefon B / airgeddon |
 | Atak | Screenshot airgeddon z przechwyconym hasłem | Terminal |
+| Raport końcowy | Plik DOCX z wszystkimi sekcjami | `generate_report.py` + pandoc |
+
+---
+
+## 7. Pełny workflow (wszystkie narzędzia)
+
+```bash
+# 1. Analiza automatyczna
+python3 analyze_pcap.py /tmp/demo.pcap AGH_Test --json --csv -o ./wyniki/
+
+# 2. Porównanie IE
+python3 beacon_diff.py /tmp/demo.pcap AGH_Test --json --markdown -o ./wyniki/
+
+# 3. Raport końcowy
+python3 generate_report.py \
+    --analyze-json wyniki/evil_twin_analysis.json \
+    --diff-json wyniki/beacon_diff.json \
+    --autorzy "Imię Nazwisko" \
+    -o raport_koncowy.md
+
+# 4. Konwersja
+pandoc raport_koncowy.md -o raport_koncowy.docx
+```
+
+Szczegółowa instrukcja krok-po-kroku: [`PLAN_PRAKTYCZNY.md`](../PLAN_PRAKTYCZNY.md)

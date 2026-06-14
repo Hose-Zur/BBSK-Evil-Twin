@@ -118,14 +118,17 @@ BBSK-Evil-Twin/
 │   └── known-limitations.md         # Znane ograniczenia
 │
 ├── dokumentacja/                    # Opracowania w formatach biurowych
-│   └── opracowanie_wstepne.docx     # Opracowanie wstępne (DOCX)
+│   ├── opracowanie_wstepne.docx     # Opracowanie wstępne (DOCX)
+│   └── PLAN_PRAKTYCZNY.md           # Instrukcja wykonania części praktycznej
 │
 ├── notatki/                         # Notatki robocze (nieformalne)
 │   ├── odp.md                       # Konsultacje — plan działania
 │   └── odp2.md                      # Konsultacje — szczegółowy przegląd
 │
 ├── skrypty/                         # Kod źródłowy
-│   └── analyze_pcap.py              # Główny skrypt analityczny
+│   ├── analyze_pcap.py              # Główny skrypt analityczny (v2.0)
+│   ├── beacon_diff.py               # Szczegółowe porównanie IE między AP (v1.0)
+│   └── generate_report.py           # Generator raportu końcowego (v1.0)
 │
 ├── tests/                           # Testy jednostkowe
 │   └── test_analyze_pcap.py         # Testy skryptu analitycznego
@@ -164,34 +167,51 @@ Kompletna konfiguracja środowiska: [`docs/setup.md`](docs/setup.md)
 
 ## Użycie
 
+### Narzędzia
+
+| Narzędzie | Opis |
+|---|---|
+| `analyze_pcap.py` (v2.0) | Automatyczna analiza AP — raport + JSON + CSV + wykres |
+| `beacon_diff.py` (v1.0) | Szczegółowe porównanie IE między dwoma AP |
+| `generate_report.py` (v1.0) | Generator raportu końcowego (Markdown → DOCX) |
+
 ### Podstawowe
 
 ```bash
 # Analiza wszystkich AP w pliku pcap
 python3 skrypty/analyze_pcap.py /tmp/demo-01.pcap
 
-# Analiza z filtrowaniem po SSID
-python3 skrypty/analyze_pcap.py /tmp/demo-01.pcap AGH_Test
+# Analiza z filtrowaniem po SSID + eksport JSON/CSV
+python3 skrypty/analyze_pcap.py /tmp/demo-01.pcap AGH_Test --json --csv -o ./wyniki/
+
+# Porównanie IE między dwoma AP
+python3 skrypty/beacon_diff.py /tmp/demo-01.pcap AGH_Test --json --markdown -o ./wyniki/
+
+# Generowanie raportu końcowego
+python3 skrypty/generate_report.py \
+    --analyze-json wyniki/evil_twin_analysis.json \
+    --diff-json wyniki/beacon_diff.json \
+    -o raport_koncowy.md
 ```
 
 ### Pełny workflow
 
 1. **Przechwyć ruch** — airodump-ng w trybie monitor
 2. **Przeprowadź atak** — airgeddon z captive portalem
-3. **Analizuj** — uruchom skrypt na pliku .pcap
+3. **Analizuj** — `analyze_pcap.py` + `beacon_diff.py`
 4. **Weryfikuj w Wireshark** — ręczna analiza IE, RSSI, seq
+5. **Generuj raport** — `generate_report.py` → DOCX
 
 Szczegółowa procedura: [`docs/attack-procedure.md`](docs/attack-procedure.md)
+Instrukcja krok-po-kroku: [`PLAN_PRAKTYCZNY.md`](PLAN_PRAKTYCZNY.md)
 
-### Wyjście skryptu
+### Wyjście skryptów
 
-Skrypt generuje:
-
-| Element | Opis |
+| Narzędzie | Wyniki |
 |---|---|
-| **Raport tekstowy** | Lista AP: BSSID, SSID, liczba ramek Beacon, średni RSSI, Supported Rates, Vendor Specific IE, zakres Sequence Numbers |
-| **Ostrzeżenie** | Jeśli >1 urządzenie nadaje z tym samym SSID — potencjalny Evil Twin |
-| **Wykres** | `evil_twin_analysis.png` — dwa podwykresy: (1) Sequence Numbers w czasie, (2) RSSI w czasie |
+| `analyze_pcap.py` | Raport tekstowy + ostrzeżenie Evil Twin + JSON + CSV + wykres PNG |
+| `beacon_diff.py` | Raport porównania IE + JSON + Markdown z werdyktem |
+| `generate_report.py` | Raport końcowy `.md` (gotowy do konwersji na DOCX przez pandoc) |
 
 ---
 
