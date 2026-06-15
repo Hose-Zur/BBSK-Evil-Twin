@@ -1,0 +1,6 @@
+# ETAP 15 — Evil Twin z create_ap + długi capture (5 min)
+## Narzędzie: create_ap --no-virt -c 4 wlan0 eth0 601A
+## Internet: NAT działa (iPhone potwierdził dostęp)
+## Capture: tcpdump -i wlan1 -y IEEE802_11_RADIO -w beacons_only.pcap "type mgt subtype beacon"
+## Wynik: 935 beaconów w 34s (296 z oryginalnego AP, 333 z Evil Twin)
+## Dodatkowo: 375733 pakietów danych przez Evil Twin (180 MB)

@@ -1,0 +1,12 @@
+# ETAP 17 — Cracking WPA handshake + DNS monitoring
+## WPA Handshake
+- PMKID przechwycony z Evil Twin AP (64:70:02:18:B9:22)
+- Format: WPA*02*...
+- Narzędzie: hcxpcapngtool (konwersja pcap → hc22000)
+- Hashcat -m 22000 z hasłem testowym: SUCCESS
+- Hasło: nbi8-yhs5-ajxp (potwierdzone)
+## DNS/HTTP Monitoring
+- tcpdump na wlan0 (interfejs AP)
+- Przechwycony ruch do Google (216.239.36.223:443)
+- Protokół: QUIC (HTTP/3) na porcie 443
+- Urządzenie klienta: 192.168.12.193

@@ -1,0 +1,14 @@
+# ETAP 10 — Atak KARMA (Karma Attacks Radio Machines Automatically)
+## Narzedzie: hostapd-mana v2.6
+## Komenda:
+timeout 45 hostapd-mana /tmp/karma_hostapd.conf (tryb KARMA, kanal 4)
+timeout 45 airodump-ng wlan1 -c 4 -w /tmp/karma_capture --output-format pcap
+## Opis ataku:
+KARMA nasluchuje probe requestow od klientow i odpowiada beaconem z zadanym SSID.
+Kazdy klient, ktory wysyla probe request (szuka znanej sieci), zostaje zlapany.
+W eterze widac: JEDEN BSSID → WIELE SSID (odpowiedzi na rozne probe requesty).
+## Wynik:
+Plik pcap: -rw-rw-r-- 1 root root 189K Jun 15 13:08 /tmp/karma_capture-01.cap
+## Wnioski:
+KARMA dziala pasywnie - nie wymaga znajomosci SSID ofiary.
+Dziala najlepiej gdy klienci aktywnie szukaja sieci (np. wlaczone Wi-Fi, skanowanie).

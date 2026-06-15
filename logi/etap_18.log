@@ -1,0 +1,11 @@
+# ETAP 18 — MANA Attack (poprawny)
+## Narzędzie: hostapd-mana (enable_mana=1)
+## Konfiguracja: interface=wlan0, ssid=FreeWiFi, channel=4, enable_mana=1
+## Wynik:
+- iPhone (ba:a1:0e:08:e0:35) wysyła directed probe requesty dla SSID '601A'
+- MANA AP przechwytuje je i odpowiada (ignorując docelowy BSSID)
+- 896 pakietów przechwyconych (beacony + probe requesty + probe responses)
+- AP widoczny w eterze: BSSID 64:70:02:18:B9:22, SSID "FreeWiFi", RSSI -22.3 dBm
+## Wnioski:
+MANA działa — przechwytuje directed probe requesty od iPhone'a.
+To dowód że atak MANA omija zabezpieczenia nowszych systemów (iOS).

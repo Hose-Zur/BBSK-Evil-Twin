@@ -1,0 +1,261 @@
+{
+  "metadata": {
+    "tool": "beacon_diff.py v1.0",
+    "project": "BBSK-Evil-Twin",
+    "timestamp_utc": "2026-06-15T11:41:20.766196+00:00"
+  },
+  "ap1": {
+    "bssid": "64:70:02:18:B9:22",
+    "ssid": "601A",
+    "frame_count": 333,
+    "avg_rssi": -22.6
+  },
+  "ap2": {
+    "bssid": "7C:F1:7E:C1:7B:95",
+    "ssid": "601A",
+    "frame_count": 296,
+    "avg_rssi": -41.2
+  },
+  "metrics": {
+    "ssid_match": true,
+    "rssi_diff": 18.6,
+    "frame_count_diff": 37,
+    "seq_range_1": "1559–1894",
+    "seq_range_2": "2297–3723",
+    "seq_overlap": 0,
+    "avg_rssi_1": -22.6,
+    "avg_rssi_2": -41.2
+  },
+  "differences": [
+    {
+      "ie_id": 1,
+      "ie_name": "Supported Rates",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "82848b960c121824"
+      ],
+      "ap2_values": [
+        "82848b961224486c"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 3,
+      "ie_name": "DSSS Parameter Set",
+      "status": "IDENTICAL",
+      "ap1_values": [
+        "Channel 4"
+      ],
+      "ap2_values": [
+        "Channel 4"
+      ],
+      "common_values": [
+        "Channel 4"
+      ]
+    },
+    {
+      "ie_id": 5,
+      "ie_name": "TIM (Traffic Indication Map)",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "01020006",
+        "01020000",
+        "00020004",
+        "00020002"
+      ],
+      "ap2_values": [
+        "00010000"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 11,
+      "ie_name": "BSS Load",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "010000127a"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 32,
+      "ie_name": "Power Constraint",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "00"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 35,
+      "ie_name": "TPC Report",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "3f00"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 42,
+      "ie_name": "ERP Information",
+      "status": "IDENTICAL",
+      "ap1_values": [
+        "Barker_Preamble"
+      ],
+      "ap2_values": [
+        "Barker_Preamble"
+      ],
+      "common_values": [
+        "Barker_Preamble"
+      ]
+    },
+    {
+      "ie_id": 45,
+      "ie_name": "HT Capabilities",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "LDPC, HT40, SGI20, SGI40, Tx-STBC, Rx-STBC(1), MaxAMSDU-7935"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 48,
+      "ie_name": "RSN Information",
+      "status": "IDENTICAL",
+      "ap1_values": [
+        "RSN (ver 1, len 20B)"
+      ],
+      "ap2_values": [
+        "RSN (ver 1, len 20B)"
+      ],
+      "common_values": [
+        "RSN (ver 1, len 20B)"
+      ]
+    },
+    {
+      "ie_id": 50,
+      "ie_name": "Extended Supported Rates",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "3048606c"
+      ],
+      "ap2_values": [
+        "0c183060"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 51,
+      "ie_name": "AP Channel Report",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "0b010203040506070809"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 61,
+      "ie_name": "HT Operation",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "PrimaryCh=4, SecOffset=0, ChWidth=40MHz"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 70,
+      "ie_name": "QoS Map Set",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "0200000000"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 74,
+      "ie_name": "Expedited Bandwidth Request",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "14000a002c01c800140005001900"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 127,
+      "ie_name": "Extended Capabilities",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "len=8B, raw:0000000200000040"
+      ],
+      "ap2_values": [
+        "len=8B, raw:0100080000000000"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 191,
+      "ie_name": "VHT Tx Power Envelope",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "b179c133faff0c03faff0c03"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 192,
+      "ie_name": "MCCAOP Advertisement Overview",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "000000faff"
+      ],
+      "common_values": []
+    },
+    {
+      "ie_id": 221,
+      "ie_name": "Vendor Specific",
+      "status": "DIFFERENT",
+      "ap1_values": [
+        "(brak unikalnych)"
+      ],
+      "ap2_values": [
+        "OUI:001D0F | raw:001d0f10016300007cf17ec17b957cf17ec17b95306100007b9500010000",
+        "Microsoft (WPS) | raw:0050f204104a000110104400010210470010000000000000100000007cf17ec17b95103c0001031049000600372a000120",
+        "Microsoft (WPS) | raw:0050f2020101800003a4000027a4000042435e0062322f00",
+        "OUI:000CE7 | raw:000ce708000000bf0cb101c0332aff92042aff9204c0050000002affc303010202",
+        "OUI:000C43 | raw:000c4309000000"
+      ],
+      "common_values": []
+    }
+  ],
+  "verdict": "EVIL_TWIN_CONFIRMED"
+}

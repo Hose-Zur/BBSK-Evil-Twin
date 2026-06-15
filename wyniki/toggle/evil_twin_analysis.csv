@@ -1,0 +1,3 @@
+BSSID,SSID,Frame Count,Avg RSSI,Channel,Supported Rates,Vendor Specific,HT Capabilities,Seq Min,Seq Max,Country,Power Constraint
+64:70:02:18:B9:22,601A,227,-22.8,4,"1, 2, 6, 6, 9, 11, 12, 18, 24, 36, 48, 54",,,0,931,,
+7C:F1:7E:C1:7B:95,601A,396,-42.9,4,"1, 2, 6, 6, 9, 11, 12, 18, 24, 36, 48, 54",Microsoft (WPS); OUI:000C43; OUI:000CE7; OUI:001D0F,"ldpc, ht40_supported, sgi_20, sgi_40, tx_stbc",1336,3143,,

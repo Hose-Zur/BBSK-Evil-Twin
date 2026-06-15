@@ -1,0 +1,10 @@
+# ETAP 1 — Skanowanie poczatkowe sieci 601A
+## Komenda
+airodump-ng wlan1 -c 4 -w /tmp/skan_etap1 --output-format csv
+## Wynik
+Znaleziono 3 urzadzenia podlaczone do 601A (7C:F1:7E:C1:7B:95):
+- BA:A1:0E:08:E0:35 (iPhone Piotr)  RSSI ~-23 dBm
+- 1E:89:C2:FF:08:10              RSSI ~-33 dBm
+- E0:1F:FC:86:92:B3              RSSI ~-27 dBm
+## Notatki
+Wszystkie adresy MAC zrandomizowane (locally administered). iPhone rozpoznany po typie ruchu i wczesniejszym potwierdzeniu wlasciciela.

@@ -1,0 +1,45 @@
+# ETAP 12 — Analiza automatyczna (analyze_pcap.py + beacon_diff.py)
+
+## Komendy
+python3 skrypty/analyze_pcap.py wyniki/evil_twin.pcap 601A --json --csv -o ./wyniki/
+python3 skrypty/analyze_pcap.py wyniki/karma.pcap --json -o ./wyniki/karma/
+python3 skrypty/analyze_pcap.py wyniki/mana.pcap --json -o ./wyniki/mana/
+python3 skrypty/beacon_diff.py wyniki/evil_twin.pcap 601A --json --markdown -o ./wyniki/
+
+## Wynik analyze_pcap.py (Evil Twin)
+[!] UWAGA: 2 urządzeń nadaje z SSID='601A'
+    To jest wskaźnik ataku Evil Twin!
+
+AP #1 (Evil Twin): BSSID D2:49:1E:9F:39:AB
+  - Vendor Specific: brak
+  - HT Capabilities: brak
+  - Seq Numbers: 663–663
+
+AP #2 (Oryginalny): BSSID 7C:F1:7E:C1:7B:95
+  - Vendor Specific: Microsoft (WPS) + 3 OUI
+  - HT Capabilities: ldpc, ht40, sgi_20, sgi_40, tx_stbc
+  - Seq Numbers: 1342–1342
+  - Power Constraint: 0 dB
+
+## Wynik beacon_diff.py
+WERDYKT: SUSPICIOUS (15/18 IE różniących się)
+  - 15 IE DIFFERENT
+  - 3 IE IDENTICAL
+  - Sequence Numbers: BRAK nakładania → dwa niezależne strumienie
+
+Kluczowe różnice:
+  - Supported Rates: różna kolejność
+  - HT Capabilities: obecne vs brak
+  - Vendor Specific: Microsoft WPS + 3 OUI vs brak
+  - Extended Capabilities: różne wartości
+  - HT Operation: obecne vs brak
+  - Power Constraint: 0 dB vs brak
+
+## Pliki wygenerowane
+- wyniki/evil_twin_analysis.json
+- wyniki/evil_twin_analysis.csv
+- wyniki/evil_twin_analysis.png
+- wyniki/beacon_diff.json
+- wyniki/beacon_diff.md
+- wyniki/karma/evil_twin_analysis.json
+- wyniki/mana/evil_twin_analysis.json

