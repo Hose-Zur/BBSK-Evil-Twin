@@ -1,0 +1,183 @@
+{
+  "metadata": {
+    "tool": "analyze_pcap.py v2.0",
+    "project": "BBSK-Evil-Twin",
+    "timestamp_utc": "2026-06-15T11:14:02.369332+00:00",
+    "target_ssid": null,
+    "total_aps": 3,
+    "evil_twin_detected": false
+  },
+  "access_points": {
+    "0E:F5:D2:3F:1F:1D": {
+      "bssid": "0E:F5:D2:3F:1F:1D",
+      "ssid": "FreeWiFi",
+      "frame_count": 1,
+      "channel": 4,
+      "country": null,
+      "supported_rates_mbps": [
+        1.0,
+        2.0,
+        5.5,
+        6.0,
+        9.0,
+        11.0,
+        12.0,
+        18.0,
+        24.0,
+        36.0,
+        48.0,
+        54.0
+      ],
+      "vendor_specific": [],
+      "avg_rssi_dbm": null,
+      "rssi_min": null,
+      "rssi_max": null,
+      "ht_capabilities": null,
+      "ht_primary_channel": null,
+      "power_constraint_db": null,
+      "ie_distribution": {
+        "IE_0": 1,
+        "IE_1": 1,
+        "IE_3": 1,
+        "IE_5": 1,
+        "IE_42": 1,
+        "IE_50": 1,
+        "IE_127": 1
+      },
+      "seq_number_range": {
+        "min": 35,
+        "max": 35
+      },
+      "seq_number_count": 1
+    },
+    "7C:F1:7E:C1:7B:95": {
+      "bssid": "7C:F1:7E:C1:7B:95",
+      "ssid": "601A",
+      "frame_count": 1,
+      "channel": 4,
+      "country": null,
+      "supported_rates_mbps": [
+        1.0,
+        2.0,
+        5.5,
+        6.0,
+        9.0,
+        11.0,
+        12.0,
+        18.0,
+        24.0,
+        36.0,
+        48.0,
+        54.0
+      ],
+      "vendor_specific": [
+        "Microsoft (WPS)",
+        "OUI:000C43",
+        "OUI:000CE7",
+        "OUI:001D0F"
+      ],
+      "avg_rssi_dbm": null,
+      "rssi_min": null,
+      "rssi_max": null,
+      "ht_capabilities": {
+        "ldpc": true,
+        "ht40_supported": true,
+        "sgi_20": true,
+        "sgi_40": true,
+        "tx_stbc": true,
+        "greenfield": false
+      },
+      "ht_primary_channel": 4,
+      "power_constraint_db": 0,
+      "ie_distribution": {
+        "IE_0": 1,
+        "IE_1": 1,
+        "IE_3": 1,
+        "IE_5": 1,
+        "IE_32": 1,
+        "IE_35": 1,
+        "IE_70": 1,
+        "IE_51": 1,
+        "IE_42": 1,
+        "IE_50": 1,
+        "IE_48": 1,
+        "IE_221": 5,
+        "IE_11": 1,
+        "IE_45": 1,
+        "IE_61": 1,
+        "IE_74": 1,
+        "IE_191": 1,
+        "IE_192": 1,
+        "IE_127": 1
+      },
+      "seq_number_range": {
+        "min": 2284,
+        "max": 2284
+      },
+      "seq_number_count": 1
+    },
+    "7E:F1:7E:21:7B:95": {
+      "bssid": "7E:F1:7E:21:7B:95",
+      "ssid": "?",
+      "frame_count": 1,
+      "channel": 4,
+      "country": null,
+      "supported_rates_mbps": [
+        1.0,
+        2.0,
+        5.5,
+        6.0,
+        9.0,
+        11.0,
+        12.0,
+        18.0,
+        24.0,
+        36.0,
+        48.0,
+        54.0
+      ],
+      "vendor_specific": [
+        "Microsoft (WPS)",
+        "OUI:000C43",
+        "OUI:000CE7",
+        "OUI:001D0F"
+      ],
+      "avg_rssi_dbm": null,
+      "rssi_min": null,
+      "rssi_max": null,
+      "ht_capabilities": {
+        "ldpc": true,
+        "ht40_supported": true,
+        "sgi_20": true,
+        "sgi_40": true,
+        "tx_stbc": true,
+        "greenfield": false
+      },
+      "ht_primary_channel": 4,
+      "power_constraint_db": null,
+      "ie_distribution": {
+        "IE_0": 1,
+        "IE_1": 1,
+        "IE_3": 1,
+        "IE_5": 1,
+        "IE_51": 1,
+        "IE_42": 1,
+        "IE_50": 1,
+        "IE_48": 1,
+        "IE_11": 1,
+        "IE_45": 1,
+        "IE_61": 1,
+        "IE_74": 1,
+        "IE_191": 1,
+        "IE_192": 1,
+        "IE_127": 1,
+        "IE_221": 4
+      },
+      "seq_number_range": {
+        "min": 2285,
+        "max": 2285
+      },
+      "seq_number_count": 1
+    }
+  }
+}
