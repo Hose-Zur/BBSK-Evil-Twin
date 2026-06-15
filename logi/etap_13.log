@@ -1,0 +1,31 @@
+# ETAP 13 — Porównanie metod ataku i detekcji
+
+## Metody ataku — porównanie skuteczności
+
+| Metoda | Narzędzie | Działa? | Urządzenia przejęte | Dowód |
+|---|---|---|---|---|
+| **Evil Twin** | hostapd + dnsmasq + NAT | ✅ TAK | iPhone + iPad | DHCP leases, pcap, analiza |
+| **KARMA** | hostapd-mana (enable_mana=0) | ⚠️ Częściowo | 0 (brak probe requestów) | pcap 189K |
+| **MANA** | hostapd-mana (enable_mana=1) | ❌ Konfiguracja | 0 (błąd mana_ssid_file) | pcap 737K |
+
+## Metody detekcji — porównanie skuteczności
+
+| Metoda | Narzędzie | Działa? | Dowód | Uwagi |
+|---|---|---|---|---|
+| **Fingerprinting IE** | beacon_diff.py | ✅ TAK | 15/18 IE różnych | Najmocniejszy dowód |
+| **Analiza RSSI** | analyze_pcap.py | ⚠️ Brak RSSI w pcap | RSSI nie zapisane | Problem z radiotap |
+| **Sequence Numbers** | analyze_pcap.py | ✅ TAK | 2 niezależne strumienie | Brak nakładania |
+
+## Wnioski końcowe
+
+1. **Evil Twin** — najskuteczniejszy atak. Wymaga znajomości SSID i hasła ofiary. Wykrywalny przez:
+   - Fingerprinting IE (różne Vendor Specific, HT Capabilities)
+   - Sequence Numbers (dwa strumienie)
+   - RSSI (skok sygnału — jeśli karta blisko)
+
+2. **KARMA** — działa pasywnie, nie wymaga znajomości SSID. Mniej skuteczny na nowych systemach (pasywne skanowanie). Wykrywalny przez:
+   - Jeden BSSID → wiele SSID (anomalia)
+
+3. **MANA** — najbardziej zaawansowany (Loud Mode, directed probe response). Nie przetestowany w pełni (błąd konfiguracji hostapd-mana). Wymaga poprawnej instalacji mana-toolkit.
+
+4. **Detekcja** — najlepsze wyniki daje połączenie wszystkich 3 metod. Samo fingerprinting IE (beacon_diff.py) dało 15/18 różnic — to twardy dowód na Evil Twin.

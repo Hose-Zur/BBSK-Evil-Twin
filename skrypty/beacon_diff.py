@@ -418,7 +418,8 @@ def _format_diff_report(ap1, ap2, diffs, metrics):
     lines.append(f"  Identyczne        : {identical_count}")
     lines.append(f"  Różne             : {diff_count}")
 
-    if diff_count >= 2 and metrics.get("rssi_diff", 0) > 10:
+    rssi_diff_val = metrics.get("rssi_diff") or 0
+    if diff_count >= 2 and rssi_diff_val > 10:
         lines.append("")
         lines.append("  🔴 WERDYKT: EVIL TWIN POTWIERDZONY")
         lines.append("     (≥2 różne IE + anomalia RSSI > 10 dBm)")
@@ -481,7 +482,7 @@ def _format_markdown(ap1, ap2, diffs, metrics):
             lines.append(f"Wspólne: {', '.join(d['common_values'][:3])}")
         lines.append("")
 
-    if metrics.get("rssi_diff", 0) > 10 or any(d["status"] == "DIFFERENT" for d in diffs):
+    if (metrics.get("rssi_diff") or 0) > 10 or any(d["status"] == "DIFFERENT" for d in diffs):
         lines.append("## 🔴 WERDYKT: EVIL TWIN POTWIERDZONY")
     else:
         lines.append("## 🟢 WERDYKT: BRAK DOWODÓW")
@@ -513,7 +514,7 @@ def _format_json_export(ap1, ap2, diffs, metrics):
         },
         "metrics": metrics,
         "differences": diffs,
-        "verdict": "EVIL_TWIN_CONFIRMED" if metrics.get("rssi_diff", 0) > 10
+        "verdict": "EVIL_TWIN_CONFIRMED" if (metrics.get("rssi_diff") or 0) > 10
                    else "SUSPICIOUS" if any(d["status"] == "DIFFERENT" for d in diffs)
                    else "NO_EVIDENCE",
     }
