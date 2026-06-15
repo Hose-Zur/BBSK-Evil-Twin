@@ -1,0 +1,10 @@
+# ETAP 16 — Analiza końcowa (beacon_diff z prawdziwymi danymi)
+## analyze_pcap.py: 2 AP z SSID=601A, 629 ramek Beacon łącznie
+##   AP #1 (oryginalny): 296 beaconów, RSSI -41.2 dBm, seq 2297-3723
+##   AP #2 (Evil Twin):  333 beacony,  RSSI -22.6 dBm, seq 1559-1894
+## beacon_diff.py: 🔴 WERDYKT EVIL_TWIN_CONFIRMED
+##   15/18 IE różnych, RSSI anomalia 18.6 dBm, seq numbers brak nakładania
+## Kluczowe różnice IE:
+##   HT Capabilities: LDPC+HT40+SGI vs BRAK
+##   Vendor Specific: Microsoft WPS+4 OUI vs BRAK
+##   Power Constraint: 0 dB vs BRAK
