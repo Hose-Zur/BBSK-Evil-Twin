@@ -39,3 +39,7 @@ dokumentacja/~*.docx
 # ─── Zachowaj strukturę katalogów ──────────────────────────────
 !przechwycony_ruch/.gitkeep
 !wyniki/.gitkeep
+.mex/
+.codewhale/
+.codex/
+.config/
