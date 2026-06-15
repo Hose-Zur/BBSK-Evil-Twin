@@ -1,0 +1,16 @@
+# ETAP 19 — TLS SNI Capture + Poprawa wykresów
+## TLS SNI
+- tcpdump na porcie 443 (TLS Client Hello)
+- Obejście szyfrowanego DNS (DoH/DoT) — SNI zdradza domeny
+- Przechwycone domeny Apple: setup.icloud.com, smp-device-content.apple.com, p17-buy.itunes.apple.com
+- Dowód: nawet przy szyfrowanym DNS, nazwy odwiedzanych domen są widoczne w TLS Client Hello
+
+## Poprawa wykresów (analyze_pcap.py v2.1)
+- Przepisana funkcja _generate_plot:
+  - 2x2 układ (4 panele zamiast 2)
+  - Panel 1: Sequence Numbers jako linia (nie scatter) z subsamplingiem
+  - Panel 2: RSSI jako boxplot z adnotacją Delta
+  - Panel 3: IE Fingerprinting jako bar chart (6 kluczowych IE)
+  - Panel 4: Podsumowanie tekstowe z werdyktem
+- Poprawione fonty (sans-serif), DPI 200, białe tło
+- Usunięte ostrzeżenia o glifach (plt.close() zamiast plt.show())

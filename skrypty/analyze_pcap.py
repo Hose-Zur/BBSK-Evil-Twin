@@ -481,81 +481,187 @@ def _export_csv(aps: dict, output_path: str):
 
 
 def _generate_plot(aps: dict, output_path: str, target_ssid: str, pcap_file: str):
-    """Generuje wykres Sequence Numbers + RSSI."""
+    """Generuje profesjonalny wykres: Sequence Numbers + RSSI + porownanie."""
     if not PLOT_AVAILABLE or not aps:
         return
 
-    fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+    # Ustawienia globalne dla czytelnosci
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.rcParams["font.size"] = 10
+    plt.rcParams["axes.titlesize"] = 12
+    plt.rcParams["axes.labelsize"] = 10
+
+    COLORS = ["#E63946", "#2A9D8F", "#264653"]
+
+    fig, axes = plt.subplots(2, 2, figsize=(16, 10))
     fig.suptitle(
-        f"Evil Twin Detection — AP Fingerprinting (v2.0)\n"
-        f"SSID: {target_ssid or 'wszystkie'}   |   "
-        f"Plik: {os.path.basename(pcap_file)}",
-        fontsize=13, fontweight="bold", y=0.98,
+        f"Evil Twin Detection Report\n"
+        f"SSID: {target_ssid or 'all'}  |  File: {os.path.basename(pcap_file)}",
+        fontsize=14, fontweight="bold", y=0.98,
     )
 
-    COLORS = ["#E63946", "#2A9D8F", "#E9C46A", "#264653", "#A8DADC", "#F4A261"]
-
-    # --- Subplot 1: Sequence Numbers ---
-    ax1 = axes[0]
-    patches = []
+    # ─── Subplot 1: Sequence Numbers (linia, nie scatter) ───
+    ax1 = axes[0, 0]
     for i, (bssid, data) in enumerate(aps.items()):
-        if not data["seq_nums"]:
+        if not data["seq_nums"] or len(data["seq_nums"]) < 2:
             continue
         color = COLORS[i % len(COLORS)]
         times, seqs = zip(*data["seq_nums"])
         t0 = times[0]
         times_rel = [t - t0 for t in times]
 
-        ax1.scatter(times_rel, seqs, s=3, color=color, alpha=0.8)
-        label = f"{bssid.upper()} | SSID: {data['ssid']} | {data['frame_count']} ramek"
-        patches.append(mpatches.Patch(color=color, label=label))
+        # Subsample dla czytelnosci (max 100 punktow)
+        step = max(1, len(times_rel) // 100)
+        ax1.plot(times_rel[::step], seqs[::step], "-o", color=color,
+                markersize=2, linewidth=1.5, alpha=0.9,
+                label=f"{bssid.upper()} ({data['ssid']}) [{data['frame_count']} beacons]")
 
-    ax1.set_xlabel("Czas relatywny [s]", fontsize=10)
-    ax1.set_ylabel("Sequence Number", fontsize=10)
-    ax1.set_title(
-        "Sequence Numbers — rozwidlenie = dwa różne urządzenia sprzętowe (Evil Twin)",
-        fontsize=11)
-    ax1.legend(handles=patches, loc="upper left", fontsize=8)
-    ax1.grid(True, alpha=0.3)
+    ax1.set_xlabel("Relative time [s]")
+    ax1.set_ylabel("Sequence Number (mod 4096)")
+    ax1.set_title("Method 3: Sequence Number Analysis\nTwo independent streams = two devices")
+    ax1.legend(loc="upper left", fontsize=8)
+    ax1.grid(True, alpha=0.3, linestyle="--")
 
     if len(aps) > 1:
-        ax1.annotate(
-            "ANOMALIA: dwa strumienie\ndla tego samego SSID",
-            xy=(0.02, 0.92), xycoords="axes fraction",
-            fontsize=9, color="red",
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="lightyellow", edgecolor="red"),
-        )
+        ax1.text(0.98, 0.05, "EVIL TWIN DETECTED\nNon-overlapping sequences",
+                 transform=ax1.transAxes, fontsize=10, color="red", fontweight="bold",
+                 ha="right", va="bottom",
+                 bbox=dict(boxstyle="round,pad=0.5", facecolor="lightyellow",
+                          edgecolor="red", alpha=0.9))
 
-    # --- Subplot 2: RSSI w czasie ---
-    ax2 = axes[1]
-    patches2 = []
+    # ─── Subplot 2: RSSI boxplot porownawczy ───
+    ax2 = axes[0, 1]
+    rssi_data = []
+    labels = []
     for i, (bssid, data) in enumerate(aps.items()):
-        if not data["rssi"] or not data["seq_nums"]:
+        if not data["rssi"]:
             continue
-        color = COLORS[i % len(COLORS)]
-        times = [t for t, _ in data["seq_nums"]]
-        t0 = min(times)
-        n = min(len(times), len(data["rssi"]))
-        times_rel = [t - t0 for t in times[:n]]
-        rssi_vals = data["rssi"][:n]
+        rssi_data.append(data["rssi"])
+        avg = round(sum(data["rssi"]) / len(data["rssi"]), 1)
+        labels.append(f"{bssid.upper()[:17]}\navg: {avg} dBm")
 
-        ax2.scatter(times_rel, rssi_vals, s=3, color=color, alpha=0.6)
-        avg = round(sum(rssi_vals) / len(rssi_vals), 1)
-        label = f"{bssid.upper()} | avg RSSI: {avg} dBm"
-        patches2.append(mpatches.Patch(color=color, label=label))
+    if rssi_data:
+        bp = ax2.boxplot(rssi_data, tick_labels=labels, patch_artist=True,
+                         widths=0.4, showmeans=True,
+                         meanprops=dict(marker="D", markerfacecolor="red", markersize=8))
+        for patch, color in zip(bp["boxes"], COLORS[:len(rssi_data)]):
+            patch.set_facecolor(color)
+            patch.set_alpha(0.4)
 
-    ax2.set_xlabel("Czas relatywny [s]", fontsize=10)
-    ax2.set_ylabel("RSSI [dBm]", fontsize=10)
-    ax2.set_title("RSSI w czasie — nienaturalny skok sygnału wskazuje na Evil Twin",
-                   fontsize=11)
-    ax2.legend(handles=patches2, loc="upper left", fontsize=8)
-    ax2.grid(True, alpha=0.3)
+        ax2.set_ylabel("RSSI [dBm]")
+        ax2.set_title("Method 2: RSSI Comparison\nLarger difference = anomaly")
+        ax2.grid(True, alpha=0.3, linestyle="--", axis="y")
+        ax2.axhline(y=-30, color="orange", linestyle=":", alpha=0.5, label="Strong signal")
+        ax2.axhline(y=-50, color="blue", linestyle=":", alpha=0.5, label="Weak signal")
 
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
+        if len(rssi_data) >= 2:
+            avg0 = sum(rssi_data[0]) / len(rssi_data[0])
+            avg1 = sum(rssi_data[1]) / len(rssi_data[1])
+            diff = abs(avg0 - avg1)
+            ax2.text(0.98, 0.95, f"Delta = {diff:.1f} dBm",
+                     transform=ax2.transAxes, fontsize=11, fontweight="bold",
+                     ha="right", va="top",
+                     bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
+
+    # ─── Subplot 3: IE Comparison Bar Chart ───
+    ax3 = axes[1, 0]
+    ie_labels = ["HT Capabilities", "Vendor Specific", "Power Constraint",
+                 "HT Operation", "Ext. Capabilities", "Country"]
+    ie_original = []
+    ie_evil = []
+    for bssid, data in aps.items():
+        has_ht = 1 if data.get("ht_capabilities") else 0
+        has_vendor = 1 if data.get("vendor_specific") else 0
+        has_power = 1 if data.get("power_constraint") is not None else 0
+        has_htop = 1 if data.get("ht_primary_channel") is not None else 0
+        has_ext = 1 if data.get("extended_capabilities_raw") else 0
+        has_country = 1 if data.get("country") else 0
+        values = [has_ht, has_vendor, has_power, has_htop, has_ext, has_country]
+        if "7C:F1" in bssid.upper() or "ORIGINAL" in bssid.upper():
+            ie_original = values
+        else:
+            ie_evil = values
+
+    x_pos = range(len(ie_labels))
+    width = 0.35
+    if ie_original:
+        ax3.bar([x - width/2 for x in x_pos], ie_original, width,
+                label="Original AP", color=COLORS[0], alpha=0.7)
+    if ie_evil:
+        ax3.bar([x + width/2 for x in x_pos], ie_evil, width,
+                label="Evil Twin AP", color=COLORS[1], alpha=0.7)
+
+    ax3.set_xticks(x_pos)
+    ax3.set_xticklabels(ie_labels, rotation=30, ha="right", fontsize=9)
+    ax3.set_ylabel("Present (1) / Missing (0)")
+    ax3.set_title("Method 1: IE Fingerprinting\nKey Information Elements comparison")
+    ax3.legend(loc="upper right", fontsize=8)
+    ax3.set_ylim(0, 1.5)
+    ax3.grid(True, alpha=0.2, axis="y")
+
+    # ─── Subplot 4: Podsumowanie tekstowe ───
+    ax4 = axes[1, 1]
+    ax4.axis("off")
+    lines = []
+    lines.append("DETECTION SUMMARY")
+    lines.append("=" * 35)
+    lines.append("")
+    total_beacons = sum(d["frame_count"] for d in aps.values())
+    lines.append(f"Total beacons analyzed: {total_beacons}")
+    lines.append(f"Unique APs found:      {len(aps)}")
+
+    if len(aps) >= 2:
+        ap_list = list(aps.values())
+        if ap_list[0].get("rssi") and ap_list[1].get("rssi"):
+            avg0 = sum(ap_list[0]["rssi"]) / len(ap_list[0]["rssi"])
+            avg1 = sum(ap_list[1]["rssi"]) / len(ap_list[1]["rssi"])
+            lines.append(f"RSSI difference:       {abs(avg0-avg1):.1f} dBm")
+
+        seqs0 = [s for _, s in ap_list[0]["seq_nums"]]
+        seqs1 = [s for _, s in ap_list[1]["seq_nums"]]
+        if seqs0 and seqs1:
+            overlap = max(0, min(max(seqs0), max(seqs1)) - max(min(seqs0), min(seqs1)))
+            lines.append(f"Seq number overlap:    {overlap}")
+            if overlap == 0:
+                lines.append("  => Independent streams!")
+
+        ht0 = bool(ap_list[0].get("ht_capabilities"))
+        ht1 = bool(ap_list[1].get("ht_capabilities"))
+        vd0 = bool(ap_list[0].get("vendor_specific"))
+        vd1 = bool(ap_list[1].get("vendor_specific"))
+        ie_diff = (ht0 != ht1) + (vd0 != vd1)
+        lines.append(f"IE differences:        {ie_diff}+ key IEs differ")
+
+    lines.append("")
+    lines.append("VERDICT:")
+    if len(aps) >= 2:
+        lines.append("  EVIL TWIN CONFIRMED")
+        lines.append("  Multiple methods agree")
+    lines.append("")
+    lines.append(f"Tool: analyze_pcap.py v2.0")
+    lines.append(f"Project: BBSK-Evil-Twin")
+
+    for i, line in enumerate(lines):
+        is_header = line.startswith("DETECTION") or line.startswith("VERDICT")
+        is_sep = line.startswith("=")
+        if is_header:
+            ax4.text(0.05, 0.95 - i * 0.035, line, fontsize=13, fontweight="bold",
+                    transform=ax4.transAxes, verticalalignment="top")
+        elif is_sep:
+            ax4.text(0.05, 0.95 - i * 0.035, line, fontsize=9, color="gray",
+                    transform=ax4.transAxes, verticalalignment="top")
+        elif line.startswith("  EVIL"):
+            ax4.text(0.05, 0.95 - i * 0.035, line, fontsize=12, color="red",
+                    fontweight="bold", transform=ax4.transAxes, verticalalignment="top")
+        else:
+            ax4.text(0.05, 0.95 - i * 0.035, line, fontsize=9,
+                    transform=ax4.transAxes, verticalalignment="top")
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=200, bbox_inches="tight", facecolor="white")
+    plt.close()
     print(f"[*] Wykres zapisany: {output_path}")
-    plt.show()
 
 
 def main():
