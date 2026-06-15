@@ -510,9 +510,19 @@ def _generate_plot(aps: dict, output_path: str, target_ssid: str, pcap_file: str
         t0 = times[0]
         times_rel = [t - t0 for t in times]
 
+        # Kumuluj sequence numbers (wrap-around 0→4095)
+        cum_seq = []
+        offset = 0
+        prev = seqs[0]
+        for s in seqs:
+            if s < prev - 2000:     # skok w dol > 2000 = wrap-around
+                offset += 4096
+            cum_seq.append(s + offset)
+            prev = s
+
         # Subsample dla czytelnosci (max 100 punktow)
         step = max(1, len(times_rel) // 100)
-        ax1.plot(times_rel[::step], seqs[::step], "-o", color=color,
+        ax1.plot(times_rel[::step], cum_seq[::step], "-o", color=color,
                 markersize=2, linewidth=1.5, alpha=0.9,
                 label=f"{bssid.upper()} ({data['ssid']}) [{data['frame_count']} beacons]")
 
@@ -565,8 +575,7 @@ def _generate_plot(aps: dict, output_path: str, target_ssid: str, pcap_file: str
 
     # ─── Subplot 3: IE Comparison Bar Chart ───
     ax3 = axes[1, 0]
-    ie_labels = ["HT Capabilities", "Vendor Specific", "Power Constraint",
-                 "HT Operation", "Ext. Capabilities", "Country"]
+    ie_labels = ["Szybkie WiFi\n(802.11n)", "Producent\n(Vendor OUI)", "Ograniczenie\nmocy", "Szeroki kanał\n(40MHz)", "Dodatkowe\nfunkcje", "Kraj\n działania"]
     ie_original = []
     ie_evil = []
     for bssid, data in aps.items():

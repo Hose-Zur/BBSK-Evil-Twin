@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "tool": "analyze_pcap.py v2.0",
+    "project": "BBSK-Evil-Twin",
+    "timestamp_utc": "2026-06-15T12:56:10.233092+00:00",
+    "target_ssid": "601A",
+    "total_aps": 2,
+    "evil_twin_detected": true
+  },
+  "access_points": {
+    "64:70:02:18:B9:22": {
+      "bssid": "64:70:02:18:B9:22",
+      "ssid": "601A",
+      "frame_count": 2928,
+      "channel": 4,
+      "country": null,
+      "supported_rates_mbps": [
+        1.0,
+        2.0,
+        5.5,
+        6.0,
+        9.0,
+        11.0,
+        12.0,
+        18.0,
+        24.0,
+        36.0,
+        48.0,
+        54.0
+      ],
+      "vendor_specific": [],
+      "avg_rssi_dbm": -22.8,
+      "rssi_min": -70,
+      "rssi_max": -22,
+      "ht_capabilities": null,
+      "ht_primary_channel": null,
+      "power_constraint_db": null,
+      "ie_distribution": {
+        "IE_0": 2928,
+        "IE_1": 2928,
+        "IE_3": 2928,
+        "IE_5": 2928,
+        "IE_42": 2928,
+        "IE_50": 2928,
+        "IE_48": 2928,
+        "IE_127": 2928
+      },
+      "seq_number_range": {
+        "min": 0,
+        "max": 2045
+      },
+      "seq_number_count": 2928,
+      "avg_beacon_interval_ms": 110.0
+    },
+    "7C:F1:7E:C1:7B:95": {
+      "bssid": "7C:F1:7E:C1:7B:95",
+      "ssid": "601A",
+      "frame_count": 3882,
+      "channel": 4,
+      "country": null,
+      "supported_rates_mbps": [
+        1.0,
+        2.0,
+        5.5,
+        6.0,
+        9.0,
+        11.0,
+        12.0,
+        18.0,
+        24.0,
+        36.0,
+        48.0,
+        54.0
+      ],
+      "vendor_specific": [
+        "Microsoft (WPS)",
+        "OUI:000C43",
+        "OUI:000CE7",
+        "OUI:001D0F"
+      ],
+      "avg_rssi_dbm": -42.1,
+      "rssi_min": -60,
+      "rssi_max": -34,
+      "ht_capabilities": {
+        "ldpc": true,
+        "ht40_supported": true,
+        "sgi_20": true,
+        "sgi_40": true,
+        "tx_stbc": true,
+        "greenfield": false
+      },
+      "ht_primary_channel": 4,
+      "power_constraint_db": 0,
+      "ie_distribution": {
+        "IE_0": 3882,
+        "IE_1": 3882,
+        "IE_3": 3882,
+        "IE_5": 3882,
+        "IE_32": 3882,
+        "IE_35": 3882,
+        "IE_70": 3882,
+        "IE_51": 3882,
+        "IE_42": 3882,
+        "IE_50": 3882,
+        "IE_48": 3882,
+        "IE_221": 19410,
+        "IE_11": 3882,
+        "IE_45": 3882,
+        "IE_61": 3882,
+        "IE_74": 3882,
+        "IE_191": 3882,
+        "IE_192": 3882,
+        "IE_127": 3882
+      },
+      "seq_number_range": {
+        "min": 0,
+        "max": 4095
+      },
+      "seq_number_count": 3882,
+      "avg_beacon_interval_ms": 113.4
+    }
+  }
+}
