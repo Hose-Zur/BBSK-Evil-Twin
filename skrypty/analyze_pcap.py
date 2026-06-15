@@ -510,30 +510,26 @@ def _generate_plot(aps: dict, output_path: str, target_ssid: str, pcap_file: str
         t0 = times[0]
         times_rel = [t - t0 for t in times]
 
-        # Kumuluj sequence numbers (wrap-around 0→4095)
-        cum_seq = []
-        offset = 0
-        prev = seqs[0]
-        for s in seqs:
-            if s < prev - 2000:     # skok w dol > 2000 = wrap-around
-                offset += 4096
-            cum_seq.append(s + offset)
-            prev = s
-
         # Subsample dla czytelnosci (max 100 punktow)
         step = max(1, len(times_rel) // 100)
-        ax1.plot(times_rel[::step], cum_seq[::step], "-o", color=color,
+        ax1.plot(times_rel[::step], seqs[::step], "-o", color=color,
                 markersize=2, linewidth=1.5, alpha=0.9,
                 label=f"{bssid.upper()} ({data['ssid']}) [{data['frame_count']} beacons]")
 
     ax1.set_xlabel("Relative time [s]")
-    ax1.set_ylabel("Sequence Number (mod 4096)")
+    ax1.set_ylabel("Sequence Number (0-4095, then wraps)")
     ax1.set_title("Method 3: Sequence Number Analysis\nTwo independent streams = two devices")
     ax1.legend(loc="upper left", fontsize=8)
     ax1.grid(True, alpha=0.3, linestyle="--")
 
+    # Add wrap-around annotation
+    ax1.axhline(y=4095, color="gray", linestyle=":", alpha=0.4)
+    ax1.axhline(y=0, color="gray", linestyle=":", alpha=0.4)
+    ax1.text(0.01, 0.98, "Seq# wraps at 4096\n(counts back to 0)", transform=ax1.transAxes,
+             fontsize=7, color="gray", va="top", fontstyle="italic")
+
     if len(aps) > 1:
-        ax1.text(0.98, 0.05, "EVIL TWIN DETECTED\nNon-overlapping sequences",
+        ax1.text(0.98, 0.05, "EVIL TWIN DETECTED\nNon-overlapping seq#",
                  transform=ax1.transAxes, fontsize=10, color="red", fontweight="bold",
                  ha="right", va="bottom",
                  bbox=dict(boxstyle="round,pad=0.5", facecolor="lightyellow",
