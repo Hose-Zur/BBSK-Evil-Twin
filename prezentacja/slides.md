@@ -1,27 +1,32 @@
 ---
-theme: seriph
-title: Evil Twin, KARMA &amp; MANA
-info: |
-  ## Ataki Rogue Access Point – analiza, detekcja i przeciwdziałanie
-  Projekt BBSK-Evil-Twin, AGH WIEiT
+theme: none
+title: Ataki Evil Twin, KARMA i MANA
 class: text-center
-drawings:
-  persist: false
-transition: slide-left
-mdc: true
+transition: fade
+---
+
+<style>
+:root { --agh-red: #D41920; --agh-dark: #1A1A2E; --agh-gray: #666; }
+h1 { color: var(--agh-red) !important; font-size: 2.2em !important; }
+h2 { color: var(--agh-dark) !important; border-bottom: 3px solid var(--agh-red); padding-bottom: 0.2em; }
+.slidev-layout { padding: 2em 3em !important; }
+.col-left { border-right: 1px solid #ddd; padding-right: 2em; }
+.col-right { padding-left: 2em; }
+.highlight { color: var(--agh-red); font-weight: bold; }
+</style>
+
+---
+layout: center
 ---
 
 # Ataki Evil Twin, KARMA i MANA
 
 ## Analiza, detekcja i przeciwdziałanie
 
-<div class="pt-12">
-  <span class="text-xl opacity-50">Bezpieczeństwo Sieci Bezprzewodowych</span>
-</div>
+<br>
 
-<div class="abs-br m-6 flex gap-2">
-  <span class="text-sm opacity-50">AGH WIEiT, 2026</span>
-</div>
+**Bezpieczenstwo Sieci Bezprzewodowych**  
+AGH WIEiT | 2026
 
 ---
 layout: default
@@ -29,29 +34,33 @@ layout: default
 
 # Agenda
 
-<div class="grid grid-cols-2 gap-8 pt-4">
+<div class="grid grid-cols-2 gap-4">
 
 <div>
 
-### 🔴 Ataki
-1. **Evil Twin** – klonowanie SSID, deauth, captive portal
-2. **KARMA** – pasywne przechwytywanie probe requestów
-3. **MANA** – zaawansowany (directed probes + loud mode)
+### Ataki
+1. Czym jest Rogue AP?
+2. **Evil Twin** — klonowanie SSID
+3. **KARMA** — pasywne przechwytywanie
+4. **MANA** — zaawansowany atak
 
-### 🛡️ Detekcja
-4. Metoda 1: **Fingerprinting IE**
-5. Metoda 2: **Analiza RSSI**
-6. Metoda 3: **Sequence Numbers**
+### Detekcja
+5. Metoda 1: Fingerprinting IE
+6. Metoda 2: Analiza RSSI
+7. Metoda 3: Sequence Numbers
 
 </div>
 
 <div>
 
-### 📊 Wyniki praktyczne
-7. Środowisko laboratoryjne
-8. **Eksperyment: 10 cykli ON/OFF**
-9. Porównanie metod ataku
-10. Wnioski i mitygacja
+### Eksperyment
+8. 10 cykli ON/OFF — wyniki
+9. Evil Twin vs KARMA — porownanie
+10. **WiFiSlayer** — narzedzie zewnetrzne
+
+### Wnioski
+11. Mitygacja i ochrona
+12. Podsumowanie
 
 </div>
 
@@ -61,71 +70,79 @@ layout: default
 layout: two-cols
 ---
 
-# Czym jest Rogue AP?
+# Czym jest Rogue Access Point?
 
-<v-clicks>
+Nieautoryzowany punkt dostepowy podszywajacy sie pod legalna siec WiFi.
 
-- Nieautoryzowany punkt dostępowy **podszywający się** pod legalną sieć
-- Klient **nie widzi różnicy** – standard 802.11 nie weryfikuje tożsamości AP
-- Atakujący może:
-  - Przechwycić **hasło Wi-Fi** (captive portal)
-  - Przechwycić **ruch sieciowy** (MITM)
-  - **Kradzież poświadczeń** EAP (sieci enterprise)
+Standard **802.11 nie weryfikuje tozsamosci AP**. Klient nie widzi roznicy miedzy oryginalnym AP a atakujacym.
 
-</v-clicks>
+### Zagrozenia:
+- Kradziez hasel (captive portal)
+- Przechwycenie ruchu (MITM)
+- Kradziez poswiadczen EAP
+
+### Nasze srodowisko:
+- **Kali Linux VM** + 2 karty TP-Link RT5572
+- Oryginalny AP: SSID **601A** (BSSID: 7C:F1:7E:C1:7B:95)
+- Ofiara: **iPhone** (BA:A1:0E:08:E0:35)
 
 ::right::
 
-<div class="ml-4 mt-20">
+<br><br>
 
-```mermaid
-graph TD
-    A[Oryginalny AP<br/>SSID: 601A<br/>MAC: 7C:F1...] -->|deauth| C[Klient<br/>iPhone]
-    B[Evil Twin AP<br/>SSID: 601A<br/>MAC: 64:70...] -->|silniejszy sygnał| C
-    C -->|łączy się| B
-    B -->|captive portal| D[Przechwycone hasło]
+```
+┌─────────────────┐     ┌─────────────────┐
+│  Oryginalny AP  │     │   Evil Twin AP  │
+│  7C:F1:7E:...   │     │  64:70:02:...   │
+│  SSID: 601A     │     │  SSID: 601A     │
+└────────┬────────┘     └────────┬────────┘
+         │                       │
+         ▼                       ▼
+    ┌─────────────────────────────────┐
+    │         iPhone                   │
+    │   Nie widzi roznicy             │
+    │   Wybiera silniejszy sygnal     │
+    └─────────────────────────────────┘
 ```
 
-</div>
-
 ---
-layout: two-cols
+layout: default
 ---
 
 # Atak 1: Evil Twin
 
-### Mechanizm
+<div class="grid grid-cols-2 gap-4">
 
-1. Klonujemy **konkretny SSID** (np. 601A)
-2. Wysyłamy **ramki deauth** do klientów
-3. Klient traci połączenie z oryginałem
-4. Klient łączy się z **naszym AP** (silniejszy sygnał)
-5. Captive portal → **przechwytujemy hasło**
+<div>
 
-### Nasz setup
+### Jak dziala:
+1. Klonujemy SSID (601A)
+2. Wysylamy ramki **deauth** do klientow
+3. Klient traci polaczenie z oryginalem
+4. Klient laczy sie z **naszym AP** (blizej = silniejszy sygnal)
 
-| Komponent | Specyfikacja |
-|---|---|
-| Karta atakującego | TP-Link TL-WDN3200 (RT5572) |
-| Oryginalny AP | Router domowy 601A |
-| Ofiara | iPhone (MAC: BA:A1:0E:08:E0:35) |
-| Narzędzia | create_ap, aireplay-ng, tcpdump |
+### Nasze wyniki praktyczne:
 
-::right::
+| Metryka | Oryginal | Evil Twin |
+|---|---|---|
+| **BSSID** | 7C:F1:7E:C1:7B:95 | 64:70:02:18:B9:22 |
+| **SSID** | 601A | 601A |
+| **Beacony** | 3.882 | 2.928 |
+| **RSSI** | -42.1 dBm | **-22.8 dBm** |
+| **Vendor** | Microsoft WPS | **brak** (karta USB) |
+| **HT Cap.** | LDPC, HT40, SGI | **brak** |
 
-<div class="mt-10">
+</div>
 
-## 📊 Nasze wyniki
+<div>
 
-**Eksperyment: 10 cykli ON/OFF**
+### Dowod: 2 BSSID z tym samym SSID
 
-- 🟢 Evil Twin AP: `64:70:02:18:B9:22`
-- 🔴 Oryginalny AP: `7C:F1:7E:C1:7B:95`
-- 📦 **55 490 pakietów** przechwyconych
-- 📡 **6 810 beaconów** (2 928 Evil Twin + 3 882 oryginał)
+<img src="/wyniki/charts/evil_twin_comparison.png" style="width:100%; border:1px solid #ddd; margin-top:10px"/>
 
-<div class="text-green-500 font-bold text-xl mt-4">
-✅ iPhone przechodził między AP przez 10 cykli!
+**Wniosek:** Dwa rozne urzadzenia nadaja ten sam SSID.  
+<span class="highlight">Delta RSSI = 20.3 dBm</span> — nienaturalna roznica.
+
 </div>
 
 </div>
@@ -136,61 +153,42 @@ layout: two-cols
 
 # Atak 2: KARMA
 
-### Karma Attacks Radio Machines Automatically
+KARMA = **K**arma **A**ttacks **R**adio **M**achines **A**utomatically
 
-<div class="text-sm">
+### Jak dziala:
+1. Rogue AP **nasluchuje** probe requestow
+2. Kazdy klient wysyla zapytania o znane sieci
+3. KARMA **odpowiada beaconem** z zadanym SSID
+4. Klient widzi "swoja" siec i moze sie polaczyc
 
-1. Rogue AP **nasłuchuje** probe requestów
-2. Każdy klient wysyła zapytania o znane sieci
-3. KARMA odpowiada beaconem z **żądanym SSID**
-4. Klient łączy się automatycznie
+### Roznica od Evil Twin:
 
-</div>
-
-### Kluczowa różnica
-
-<div class="grid grid-cols-2 gap-4 mt-4">
-<div class="bg-red-100 p-3 rounded">
-
-**Evil Twin**
-- Celuje w **1 konkretny SSID**
-- Używa **deauth**
-- Wiele BSSID → 1 SSID
-
-</div>
-<div class="bg-green-100 p-3 rounded">
-
-**KARMA**
-- Łapie **wszystkie SSID**
-- **Bez deauth**
-- 1 BSSID → **wiele SSID**
-
-</div>
-</div>
+| Cecha | Evil Twin | KARMA |
+|---|---|---|
+| Deauth | **TAK** | NIE |
+| Zna SSID? | **TAK** | NIE |
+| BSSID:SSID | Wiele : 1 | **1 : wiele** |
+| Wykrywanie | Duplikat SSID | 1 BSSID → wiele SSID |
 
 ::right::
 
-<div class="mt-10">
+### Nasze wyniki:
 
-## Nasze wyniki
-
-**hostapd-mana (enable_mana=0)**
-
-Przechwycone probe requesty iPhone'a:
+KARMA AP (hostapd-mana, enable_mana=0):  
+BSSID **64:70:02:18:B9:22** przechwycil probe requesty iPhone'a:
 
 ```
-Probe Request (601A) -34 dBm
-Probe Request (601A) -34 dBm
-Probe Request (601A) -40 dBm
+Probe Request: SSID=601A, RSSI=-34 dBm
+Probe Request: SSID=FreeWiFi, RSSI=-34 dBm
 ```
 
-<div class="text-sm opacity-75 mt-2">
-iPhone aktywnie szuka sieci 601A – KARMA przechwytuje
-</div>
+**Kluczowa anomalia:**  
+Jeden BSSID nadaje 2 rozne SSID (601A + FreeWiFi). Normalny AP nadaje tylko swoj SSID.
 
-<div class="mt-4 p-3 bg-yellow-100 rounded text-sm">
-<strong>Uwaga:</strong> KARMA <strong>nie wymusza</strong> rozłączenia. Klient sam decyduje czy się połączyć. Nowe iOS (10+) używają pasywnego skanowania – mniej probe requestów.
-</div>
+<div class="highlight">
+
+Detection signature:  
+**1 BSSID → wiele SSID** (RSSI stale = jedno urzadzenie)
 
 </div>
 
@@ -200,32 +198,17 @@ layout: two-cols
 
 # Atak 3: MANA
 
-### SensePost, Defcon 22
+MANA Toolkit (SensePost, Defcon 22) — ewolucja KARMY.
 
-MANA = KARMA na sterydach:
+### Ulepszenia:
+- Odpowiada na **directed probe requests** (ignoruje docelowy BSSID)
+- **Loud Mode** — emituje popularne SSID co ~10s
+- **EAP Capture** — przechwytuje handshake Enterprise
+- **Multiple BSSID** — jeden interfejs, wiele wirtualnych AP
 
-<div class="text-sm">
+### Nasze wyniki:
 
-- ✅ Odpowiada na **directed probe requests** (ignoruje docelowy BSSID)
-- ✅ **Loud Mode** – emituje popularne SSID co ~10s
-- ✅ **EAP Capture** – przechwytuje handshake dla sieci Enterprise
-- ✅ **Multiple BSSID** – jeden interfejs → wiele wirtualnych AP
-
-</div>
-
-### Dlaczego MANA nas "nie rozłączyła"?
-
-<div class="p-3 bg-blue-100 rounded mt-4 text-sm">
-MANA to atak <strong>pasywny</strong> – czeka aż klient przyjdzie, nie wyrzuca go z sieci. Evil Twin używa <strong>deauth</strong> do siłowego przełączenia.
-</div>
-
-::right::
-
-<div class="mt-10">
-
-## Nasze wyniki
-
-**hostapd-mana (enable_mana=1)**
+MANA AP (hostapd-mana, enable_mana=1) przechwycil **directed probe requesty** iPhone'a:
 
 ```
 MANA - Directed probe request
@@ -233,89 +216,26 @@ MANA - Directed probe request
        from ba:a1:0e:08:e0:35
 ```
 
-<div class="text-green-600 font-bold mt-2">
-✅ MANA przechwycił directed probe requesty iPhone'a!
-</div>
+::right::
 
-<div class="mt-4 text-sm">
+### Status eksperymentu:
 
-| Metryka | Evil Twin | KARMA | MANA |
-|---|---|---|---|
-| Deauth | ✅ | ❌ | ❌ |
-| Cel | 1 SSID | Wszystkie | Wszystkie + Loud |
-| Skuteczność | Wysoka | Średnia | Bardzo wysoka |
+| Element | Wynik |
+|---|---|
+| MANA AP uruchomiony | TAK |
+| Directed probe przechwycony | TAK |
+| Captive Portal iOS | **NIE** — Apple CNA zablokowal |
+| Pelen atak MANA | **NIE** — ograniczenia sprzetowe |
 
-</div>
+<br>
 
-</div>
+<div style="background:#FFF3CD; padding:10px; border-radius:5px">
 
----
-layout: default
----
+MANA to atak **pasywny** — nie wymusza rozlaczenia.  
+Czeka az klient sam przejdzie do naszego AP.  
+**Evil Twin** uzywa deauth do silowego przelaczenia.  
+**KARMA** odpowiada na probe requesty bez deauth.
 
-# Metody detekcji – przegląd
-
-<div class="grid grid-cols-3 gap-6 mt-8">
-
-<div class="border rounded p-4 text-center">
-
-### 🔬 Metoda 1
-**Fingerprinting IE**
-
-Porównanie Information Elements w ramkach Beacon
-
-<div class="text-2xl font-bold text-red-500 mt-4">15/18 IE</div>
-<div class="text-sm opacity-75">różniących się</div>
-
-<div class="text-sm mt-2">
-HT Capabilities<br/>
-Vendor Specific (OUI)<br/>
-Power Constraint<br/>
-Extended Capabilities
-</div>
-
-</div>
-
-<div class="border rounded p-4 text-center">
-
-### 📶 Metoda 2
-**Analiza RSSI**
-
-Monitorowanie poziomu sygnału
-
-<div class="text-2xl font-bold text-red-500 mt-4">Δ 20.3 dBm</div>
-<div class="text-sm opacity-75">różnicy</div>
-
-<div class="text-sm mt-2">
-Evil Twin: -22.3 dBm<br/>
-Oryginał: -42.6 dBm<br/>
-<span class="text-red-500">Anomalia!</span>
-</div>
-
-</div>
-
-<div class="border rounded p-4 text-center">
-
-### 🔢 Metoda 3
-**Sequence Numbers**
-
-Śledzenie numerów sekwencyjnych
-
-<div class="text-2xl font-bold text-red-500 mt-4">2 strumienie</div>
-<div class="text-sm opacity-75">niezależne</div>
-
-<div class="text-sm mt-2">
-Evil Twin: 0–2045<br/>
-Oryginał: 0–4095<br/>
-<span class="text-red-500">Brak nakładania!</span>
-</div>
-
-</div>
-
-</div>
-
-<div class="text-center mt-8 text-xl font-bold text-red-600">
-🔴 WERDYKT: EVIL TWIN POTWIERDZONY wszystkimi trzema metodami
 </div>
 
 ---
@@ -328,29 +248,43 @@ layout: default
 
 <div>
 
-## Bar Chart – porównanie IE
+### Co porownujemy?
 
-<img src="/wyniki/experiment/evil_twin_analysis.png" class="h-80 mx-auto" />
+Information Elements w ramkach Beacon — to "odcisk palca" sprzetu.
 
-<div class="text-xs text-center mt-2 opacity-50">Czerwone = oryginalny router, Zielone = nasz Evil Twin</div>
+Kazdy producent implementuje standard 802.11 inaczej.  
+Roznice w **Supported Rates**, **Vendor OUI**, **HT Capabilities**  
+wskazuja na rozne urzadzenia.
+
+### Nasze dane:
+
+| IE | Oryginal AP | Evil Twin |
+|---|---|---|
+| Producent | Microsoft WPS | **brak** |
+| HT Capabilities | LDPC, HT40, SGI20, SGI40 | **brak** |
+| Ograniczenie mocy | 0 dB | **brak** |
+| Szeroki kanal 40MHz | TAK | **NIE** |
+| Dodatkowe funkcje | TAK | **NIE** |
 
 </div>
 
 <div>
 
-### Co oznaczają słupki?
+### Wynik: 15 z 18 IE rozni sie
 
-| IE | Oryginał | Evil Twin |
-|---|---|---|
-| **Szybkie WiFi (802.11n)** | ✅ | ❌ |
-| **Producent (Vendor OUI)** | ✅ Microsoft | ❌ |
-| **Ograniczenie mocy** | ✅ 0 dB | ❌ |
-| **Szeroki kanał (40MHz)** | ✅ | ❌ |
-| **Dodatkowe funkcje** | ✅ | ❌ |
-| **Kraj działania** | ✅ | ❌ |
+<img src="/wyniki/experiment/evil_twin_analysis.png" style="width:100%; border:1px solid #ddd"/>
 
-<div class="p-3 bg-yellow-100 rounded mt-4 text-sm">
-<strong>Wniosek:</strong> Nasz Evil Twin (prosta karta USB) nie ma zaawansowanych IE. Oryginalny router ma wszystkie. To <strong>twardy dowód</strong> że to dwa różne urządzenia.
+<div class="highlight" style="font-size:1.2em; text-align:center; margin-top:10px">
+Roznice w Vendor OUI i HT Capabilities = twardy dowod
+</div>
+
+<div style="font-size:0.85em; margin-top:10px">
+
+**Interpretacja:** Oryginalny router (czerwony) ma wszystkie  
+zaawansowane funkcje. Nasza prosta karta USB (zielony) nie ma zadnych.
+
+To jednoznacznie wskazuje na **dwa rozne urzadzenia sprzetowe**.
+
 </div>
 
 </div>
@@ -361,39 +295,105 @@ layout: default
 layout: default
 ---
 
-# Metoda 2 i 3: RSSI + Sequence Numbers
+# Metoda 2: Analiza RSSI
 
 <div class="grid grid-cols-2 gap-4">
 
 <div>
 
-### RSSI Boxplot
+### Co mierzymy?
 
-<div class="text-center text-lg font-bold">Δ = 20.1 dBm</div>
+Poziom sygnalu (RSSI) z naglowka Radiotap kazdej ramki Beacon.  
+Im wyzsza wartosc (blizej 0), tym silniejszy sygnal.
 
-<img src="/wyniki/experiment/evil_twin_analysis.png" class="h-60 mx-auto mt-2" />
+### Nasze pomiary:
 
-<div class="text-sm mt-2">
-- Nasz AP: średnia <strong>-22.8 dBm</strong> (bardzo blisko)<br/>
-- Oryginał: średnia <strong>-42.1 dBm</strong> (daleko)<br/>
-- Różnica <strong>20 dBm</strong> = 100× silniejszy sygnał od naszego AP
+| AP | Sredni RSSI | Interpretacja |
+|---|---|---|
+| Evil Twin | **-22.8 dBm** | Karta USB na biurku |
+| Oryginalny | **-42.1 dBm** | Router w innym pokoju |
+
+<div class="highlight">
+
+**Delta = 20.3 dBm**  
+Roznica sygnalu ~100 razy wieksza
+
 </div>
 
 </div>
 
 <div>
 
-### Sequence Numbers
+### Wizualizacja:
 
-<div class="text-center text-lg font-bold">10 cykli ON/OFF</div>
+<br>
+<img src="/wyniki/charts/evil_twin_comparison.png" style="width:100%; border:1px solid #ddd"/>
 
-<img src="/wyniki/experiment/evil_twin_analysis.png" class="h-60 mx-auto mt-2" />
+<br>
 
-<div class="text-sm mt-2">
-- Dwie niezależne linie = <strong>dwa urządzenia</strong><br/>
-- "Górki" = cykle włączania/wyłączania AP<br/>
-- Wrap-around co 4096 (12-bit licznik)<br/>
-- <strong>Brak nakładania</strong> się zakresów seq#
+<div style="font-size:0.9em">
+
+**Wniosek:** Dwa AP z tym samym SSID nie powinny miec tak roznego sygnalu.  
+Jeden z nich jest **nienaturalnie blisko** — to karta atakujacego.
+
+**Ograniczenie:** Atakujacy moze dostosowac moc nadawania.
+
+**Zaleta:** Wykrycie nie wymaga dodatkowego sprzetu.
+
+</div>
+
+</div>
+
+</div>
+
+---
+layout: default
+---
+
+# Metoda 3: Sequence Numbers
+
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+
+### Na czym polega?
+
+Kazda karta Wi-Fi ma **12-bitowy sprzetowy licznik** (0-4095).  
+Z kazda ramka Beacon numer rosnie o 1.  
+Po osiagnieciu 4095 zawija sie do 0.
+
+Jesli **dwa AP** nadaja ten sam SSID, kazdy ma **wlasny, niezalezny licznik**.  
+Na wykresie widac **dwa osobne strumienie**.
+
+### Nasze dane:
+
+| AP | Zakres seq |
+|---|---|
+| Oryginalny | 0 – 4095 (pelny cykl) |
+| Evil Twin | 0 – 2045 |
+
+**Brak nakladania sie zakresow** = dwa rozne urzadzenia.
+
+</div>
+
+<div>
+
+### Wykres: 10 cykli ON/OFF
+
+<img src="/wyniki/experiment/evil_twin_analysis.png" style="width:100%; border:1px solid #ddd"/>
+
+<div style="font-size:0.85em; margin-top:5px">
+
+"Gorki" na zielonej linii = momenty wlaczania/wylaczania AP.  
+Czerwona linia (oryginal) nadaje ciagle.  
+**Wrap-around** co 4096 — naturalne zachowanie licznika 12-bit.
+
+</div>
+
+<div class="highlight" style="margin-top:10px">
+
+Zaleta: licznik jest w hardware — nie da sie zmanipulowac.
+
 </div>
 
 </div>
@@ -406,116 +406,45 @@ layout: default
 
 # Eksperyment: 10 cykli ON/OFF Evil Twin
 
-<div class="grid grid-cols-3 gap-4 mt-4">
+<div class="grid grid-cols-2 gap-4">
 
-<div class="text-center">
+<div>
 
-### Przed wyłączeniem
-iPhone na **Evil Twin**<br/>
-`64:70:02:18:B9:22`
+### Przebieg:
 
-```text
-iPhone ← Evil Twin
-  RSSI: -29 dBm
-  Szybkość: 54 Mbps
-```
+1. iPhone polaczony z **Evil Twin** (64:70:02:18:B9:22)
+2. **Wylaczenie** AP (`pkill hostapd`) — iPhone traci Wi-Fi na ~5s
+3. **Wlaczenie** AP (`create_ap`) — iPhone reconnectuje w ~6s
+4. Powtorzono **10 razy**
 
-</div>
+### Statystyki:
 
-<div class="text-center">
-
-### Po wyłączeniu AP
-iPhone **bez Wi-Fi**<br/>
-(przez ~5 sekund)
-
-```text
-iPhone odłączony
-  Szuka sieci...
-  Probe requesty: 601A
-```
-
-</div>
-
-<div class="text-center">
-
-### Po włączeniu AP
-iPhone **wraca** na Evil Twin
-
-```text
-iPhone → Evil Twin
-  Nowy seq#: od 0
-  DHCP: nowy adres IP
-```
-
-</div>
-
-</div>
-
-<div class="mt-8 p-4 bg-gray-100 rounded">
-
-### Statystyki z 10 cykli
-
-| Metryka | Wartość |
+| Metryka | Wartosc |
 |---|---|
-| **Pakiety łącznie** | 55 490 |
-| **Beacony Evil Twin** | 2 928 |
-| **Beacony Oryginał** | 3 882 |
-| **Średni czas reconnectu** | ~6 sekund |
-| **Sukces reconnectu** | 10/10 (100%) |
+| Pakiety | **55 490** |
+| Beacony Evil Twin | 2 928 |
+| Beacony Oryginal | 3 882 |
+| Sukces reconnectu | **10/10** (100%) |
+| Sredni czas reconnectu | ~6s |
 
 </div>
 
----
-layout: two-cols
----
+<div>
 
-# TLS SNI – podsłuchiwanie domen
+### Co udowodnilismy:
 
-### Nawet z szyfrowanym DNS!
+1. iPhone **przechodzi** miedzy AP bez interwencji uzytkownika
+2. Czas reconnectu ~6s — **niezauwazalny** dla ofiary
+3. Sequence Numbers jednoznacznie potwierdzaja **2 urzadzenia**
+4. **Kazde przelaczenie** zostalo zarejestrowane w pcap
 
-<div class="text-sm">
+<br>
 
-- iPhone używa **DNS-over-HTTPS** (port 53 pusty)
-- Ale **TLS Client Hello** zawiera **SNI** (Server Name Indication)
-- SNI zdradza nazwę domeny – **nie da się tego ukryć**
+<div style="background:#FFF3CD; padding:10px; border-radius:5px">
+
+Wykres Seq Numbers z 10 cykli znajduje sie na poprzednim slajdzie.
 
 </div>
-
-### Przechwycone domeny
-
-```text
-setup.icloud.com
-smp-device-content.apple.com
-p17-buy.itunes.apple.com
-```
-
-<div class="text-sm opacity-75 mt-2">
-Nawet przy zaszyfrowanym DNS i HTTPS, widać jakie domeny odwiedza iPhone!
-</div>
-
-::right::
-
-<div class="mt-10">
-
-## Łamanie WPA Handshake
-
-### PMKID Attack
-
-```text
-hashcat -m 22000 handshake.hc22000
-```
-
-<div class="p-3 bg-green-100 rounded mt-4">
-
-**Wynik:** Hasło **złamane**!
-
-```
-nbi8-yhs5-ajxp
-```
-
-✅ PMKID przechwycony z Evil Twin AP<br/>
-✅ Hashcat odzyskał hasło w < 30 sekund<br/>
-✅ Dowód: cały łańcuch ataku działa
 
 </div>
 
@@ -525,88 +454,52 @@ nbi8-yhs5-ajxp
 layout: default
 ---
 
-# Porównanie trzech ataków
+# Porownanie: Evil Twin vs KARMA
 
-<div class="overflow-x-auto">
+<div class="grid grid-cols-2 gap-4">
 
-| Cecha | Evil Twin | KARMA | MANA |
-|---|---|---|---|
-| **Mechanizm** | Klonowanie SSID + deauth | Odpowiada na probe requesty | Directed probes + Loud Mode |
-| **Wymusza rozłączenie?** | ✅ Tak (deauth) | ❌ Nie | ❌ Nie |
-| **Zna SSID ofiary?** | ✅ Tak | ❌ Nie | ❌ Nie |
-| **BSSID** | Wiele → 1 SSID | 1 → wiele SSID | 1 → wiele SSID |
-| **Wykrywanie** | Duplikat SSID | Anomalia: 1 BSSID wiele SSID | Loud beacony |
-| **Skuteczność** | ⭐⭐⭐ Wysoka | ⭐⭐ Średnia | ⭐⭐⭐ Bardzo wysoka |
-| **Ochrona** | 802.11w (PMF) | Pasywne skanowanie iOS | WIDS/WIPS |
+<div style="border:2px solid #D41920; padding:15px; border-radius:8px">
 
-</div>
+### Evil Twin
 
-<div class="mt-8 text-center text-lg">
+**Wiele BSSID → 1 SSID**
 
-### Który atak jest "najlepszy"?
+- Celuje w **konkretna** siec
+- Uzywa **deauth** (silowe rozlaczenie)
+- Wykrywalny przez **duplikat SSID**
+- Potrzebuje **znac SSID** ofiary
 
-**Evil Twin** – najprostszy, najszybszy, wymaga znajomości SSID<br/>
-**MANA** – najbardziej zaawansowany, działa na wszystkie urządzenia<br/>
-**KARMA** – najcichszy, ale najmniej skuteczny na nowych systemach
+**Nasze dane:**
+- 2 BSSID z SSID "601A"
+- RSSI: -22.8 vs -42.1 (delta 20.3 dBm)
+- Rozne Vendor OUI
 
 </div>
 
----
-layout: default
----
+<div style="border:2px solid #2A9D8F; padding:15px; border-radius:8px">
 
-# Mitygacja – jak się bronić?
+### KARMA
 
-<div class="grid grid-cols-2 gap-6 mt-6">
+**1 BSSID → wiele SSID**
 
-<div class="border rounded p-4">
+- Lapie **wszystkie** probe requesty
+- **Bez deauth** (pasywny)
+- Wykrywalny przez **anomalie SSID**
+- **Nie musi znac** SSID ofiary
 
-### Dla administratorów sieci
-
-<div class="text-sm">
-
-- **802.11w (PMF)** – Protected Management Frames<br/>
-  <span class="opacity-75">Szyfruje ramki zarządzania → blokuje deauth</span>
-
-- **WIDS/WIPS** – systemy detekcji<br/>
-  <span class="opacity-75">Monitorują duplikaty SSID, anomalie RSSI</span>
-
-- **EAP-TLS** – certyfikaty dla AP<br/>
-  <span class="opacity-75">Klient weryfikuje tożsamość AP</span>
+**Nasze dane:**
+- 1 BSSID z 2 roznymi SSID (601A + FreeWiFi)
+- RSSI: stale (to samo urzadzenie)
+- Przechwycone probe requesty iPhone'a
 
 </div>
 
 </div>
 
-<div class="border rounded p-4">
+<div style="margin-top:20px; font-size:0.9em">
 
-### Dla użytkowników
-
-<div class="text-sm">
-
-- **VPN** – szyfruje ruch<br/>
-  <span class="opacity-75">Nawet na rogue AP, dane są bezpieczne</span>
-
-- **Unikanie otwartych sieci**
-  <span class="opacity-75">Publiczne Wi-Fi to łatwy cel</span>
-
-- **Sprawdzanie certyfikatów HTTPS**
-  <span class="opacity-75">Zielona kłódka ≠ bezpieczne Wi-Fi</span>
-
-- **Wyłączanie auto-join**
-  <span class="opacity-75">Nie łącz się automatycznie z "znanymi" sieciami</span>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="mt-8 p-4 bg-gradient-to-r from-red-100 to-yellow-100 rounded text-center">
-
-### Nasze narzędzia jako lekki WIDS
-
-`analyze_pcap.py` + `beacon_diff.py` mogą służyć jako **podstawowy system detekcji** – monitorują duplikaty SSID, porównują IE, śledzą RSSI i Sequence Numbers. **Open source, Python, MIT license.**
+**Wniosek:** Evil Twin jest latwiejszy do wykrycia (jawny duplikat), ale skuteczniejszy w przelamywaniu konkretnej ofiary.  
+KARMA jest trudniejsza do wykrycia (wyglada jak multi-SSID AP), ale mniej skuteczna na nowszych systemach (iOS/Android pasywne skanowanie).
 
 </div>
 
@@ -614,47 +507,106 @@ layout: default
 layout: default
 ---
 
-# Podsumowanie
+# WiFiSlayer — narzedzie pomocnicze
 
-<div class="grid grid-cols-3 gap-6 mt-10">
+<div class="grid grid-cols-2 gap-4">
 
-<div class="text-center">
+<div>
 
-### 🔴 Przeprowadzone ataki
-<div class="text-4xl font-bold text-red-500">3</div>
-<div class="text-sm opacity-75">Evil Twin · KARMA · MANA</div>
+### Co to jest?
+
+Framework do audytu sieci WiFi.  
+https://github.com/waheeb71/WiFiSlayer
+
+### Funkcjonalnosci:
+- Evil Twin z **captive portalem**
+- WPA/WPA2 Handshake capture
+- PMKID attack
+- Deauth / Beacon flooding
+- Auto-Pwn (automatyczna sekwencja ataku)
+
+### Nasze doswiadczenia:
+
+| Funkcja | Wynik |
+|---|---|
+| Captive Portal | **DZIALA** |
+| Haslo przechwycone | **TAK** (mama1234) |
+| Strona logowania | Router Firmware Update |
+| Lamanie WPA | NIE testowane |
 
 </div>
 
-<div class="text-center">
+<div>
 
-### 🛡️ Metody detekcji
-<div class="text-4xl font-bold text-blue-500">3</div>
-<div class="text-sm opacity-75">IE · RSSI · Seq Numbers</div>
+### Dlaczego WiFiSlayer?
+
+Wlasna implementacja captive portala nie zadzialala z iOS (Apple CNA). WiFiSlayer rozwiazal ten problem przez:
+
+```
+address=/#/192.168.1.1
+```
+w konfiguracji DNS — przekierowuje wszystkie zapytania na serwer captive portal.
+
+### Zdjecie strony logowania:
+
+<img src="/media/captive_portal_screen.png" style="width:100%; border:1px solid #ddd; margin-top:10px"/>
+
+<div style="font-size:0.85em">
+
+**Wniosek:** Zewnetrzne narzedzia moga skutecznie przeprowadzac ataki.  
+Nasze wlasne skrypty sluza do **DETEKCJI** (analyze_pcap.py, beacon_diff.py).
 
 </div>
 
-<div class="text-center">
-
-### 📊 Dane eksperymentalne
-<div class="text-4xl font-bold text-green-500">55k+</div>
-<div class="text-sm opacity-75">pakietów w 10 cyklach</div>
-
 </div>
 
 </div>
 
-<div class="mt-8 text-center">
+---
+layout: default
+---
 
-## Kluczowe wnioski
+# Mitygacja — jak sie chronic?
 
-<div class="text-left mx-auto max-w-2xl">
+<div class="grid grid-cols-2 gap-4">
 
-1. **Wszystkie 3 ataki** zostały przeprowadzone i udokumentowane w kontrolowanym środowisku
-2. **Każdy atak** jest wykrywalny przez analizę ramek Beacon
-3. **Najskuteczniejsza detekcja** = połączenie 3 metod (IE + RSSI + Seq#)
-4. **802.11w (PMF)** skutecznie blokuje deauth, ale nie zapobiega Evil Twin
-5. **Opracowane narzędzia** (analyze_pcap.py, beacon_diff.py) są dostępne jako open source
+<div style="background:#F5F5F5; padding:15px; border-radius:8px">
+
+### Dla administratorow sieci:
+
+**802.11w (PMF)** — Protected Management Frames  
+Szyfruje ramki zarzadzania — blokuje ataki deauth.
+
+**WIDS/WIPS** — systemy detekcji  
+Monitoruja duplikaty SSID i anomalie RSSI.
+
+**EAP-TLS** — certyfikaty dla AP  
+Klient weryfikuje tozsamosc punktu dostepowego.
+
+**Regularne skanowanie eteru**  
+W poszukiwaniu nieznanych AP — dokladnie to, co robi nasz analyze_pcap.py.
+
+</div>
+
+<div style="background:#F5F5F5; padding:15px; border-radius:8px">
+
+### Dla uzytkownikow:
+
+**VPN** — szyfruje caly ruch  
+Nawet na rogue AP dane sa bezpieczne.
+
+**Unikanie otwartych sieci**  
+Publiczne Wi-Fi to latwy cel.
+
+**Wylaczenie auto-join**  
+Nie lacz sie automatycznie z "znanymi" sieciami.
+
+**DNS-over-HTTPS**  
+Chroni przed podslychem zapytan DNS.
+
+### Nasze narzedzia jako lekki WIDS:
+
+`analyze_pcap.py` + `beacon_diff.py` moga sluzyc jako podstawowy system detekcji — open source, Python, MIT license.
 
 </div>
 
@@ -662,23 +614,55 @@ layout: default
 
 ---
 layout: center
-class: text-center
 ---
 
-# Dziękujemy za uwagę!
+# Podsumowanie
 
-<div class="mt-10">
+<div class="grid grid-cols-3 gap-4" style="margin-top:30px">
+
+<div style="text-align:center">
+<div style="font-size:3em; color:#D41920; font-weight:bold">3</div>
+<div>typy atakow<br>przeprowadzone</div>
+<div style="font-size:0.8em; color:#666">Evil Twin · KARMA · MANA</div>
+</div>
+
+<div style="text-align:center">
+<div style="font-size:3em; color:#2A9D8F; font-weight:bold">3</div>
+<div>metody detekcji<br>zaimplementowane</div>
+<div style="font-size:0.8em; color:#666">IE · RSSI · Seq Numbers</div>
+</div>
+
+<div style="text-align:center">
+<div style="font-size:3em; color:#264653; font-weight:bold">55k+</div>
+<div>pakietow<br>przechwyconych</div>
+<div style="font-size:0.8em; color:#666">10 cykli ON/OFF</div>
+</div>
+
+</div>
+
+<div style="margin-top:40px; line-height:2">
+
+- Wszystkie ataki przeprowadzone i udokumentowane
+- **Evil Twin** — najskuteczniejszy, najlatwiejszy do wykrycia
+- **KARMA** — stealthowy, mniej skuteczny na nowych systemach
+- **MANA** — najbardziej zaawansowany technicznie
+- **3 metody detekcji** niezaleznie potwierdzaja obecnosc Evil Twin
+- **WiFiSlayer** uzupelnia nasze narzedzia o captive portal
+
+</div>
+
+---
+layout: center
+---
+
+# Dziekujemy za uwage
+
+<br>
 
 ## Pytania?
 
-<div class="mt-8 opacity-75 text-sm">
+<br>
 
-Repozytorium: [github.com/Hose-Zur/BBSK-Evil-Twin](https://github.com/Hose-Zur/BBSK-Evil-Twin)
+github.com/Hose-Zur/BBSK-Evil-Twin
 
-Narzędzia: `analyze_pcap.py` · `beacon_diff.py` · `generate_report.py`
-
-Dokumentacja: `PLAN_PRAKTYCZNY.md` · `NARZEDZIA.md` · `BIBLIOGRAFIA.md`
-
-</div>
-
-</div>
+`analyze_pcap.py` · `beacon_diff.py` · `generate_report.py`

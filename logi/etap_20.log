@@ -1,0 +1,13 @@
+# ETAP 20 — Captive Portal SUCCESS through WiFiSlayer
+## Narzędzie: WiFiSlayer v3.0 (github.com/waheeb71/WiFiSlayer)
+## Opis: Evil Twin AP (SSID=601A) + DNS redirect + Captive Portal
+## Przebieg:
+1. iPhone wysłał zapytanie do captive.apple.com/hotspot-detect.html
+2. DNS redirect (#/192.168.1.1) przekierował na nasz serwer
+3. Captive portal wyświetlił stronę "Router Firmware Update"
+4. Użytkownik wpisał hasło: mama1234
+5. Hasło przechwycone i zapisane w /tmp/WiFiSlayer/logs/captured_passwords.txt
+## Wnioski:
+- WiFiSlayer działa poprawnie z captive portalem (w przeciwieństwie do naszego ręcznego setupu)
+- Kluczowa różnica: DNS redirect (address=/#/IP) obsługuje Apple CNA
+- Captive portal dostarcza dodatkowy materiał do prezentacji
