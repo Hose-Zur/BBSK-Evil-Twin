@@ -1,0 +1,8 @@
+# ETAP 6 — Internet na Evil Twin AP
+## Komendy
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT
+## Wynik
+Klienci polaczeni z Evil Twin AP (5E:B9:3E:65:A9:E9, SSID=601A) maja dostep do internetu.
+Ruch jest NAT-owany przez eth0 Kali (172.16.206.133).

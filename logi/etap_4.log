@@ -1,0 +1,11 @@
+# ETAP 4 — Testowy AP z DHCP
+## Komenda
+hostapd -B z konfiguracja SSID=Test_AP2, WPA2-PSK na wlan0 (kanal 6).
+dnsmasq --interface=wlan0 --dhcp-range=192.168.100.50,192.168.100.150,12h
+## Wynik
+AP testowy dziala.
+Uzytkownik polaczyl 2 urzadzenia z Test_AP2.
+Oba urzadzenia dostaly adresy IP (DHCP dziala).
+## Wnioski
+Karta RT5572 w trybie AP dziala poprawnie pod warunkiem ze jest skonfigurowany DHCP.
+Dla Evil Twin 601A nalezy uzyc hostapd + dnsmasq razem.

